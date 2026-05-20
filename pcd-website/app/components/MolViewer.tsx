@@ -61,14 +61,14 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
 
         // Pocket-lining residues — highlighted in accent cyan
         if (pocketResidues.length > 0) {
-          // Parse residue numbers — use comma-separated string (most reliable format in 3Dmol.js)
-          const resnums = pocketResidues
+          // 3Dmol.js resi selector requires an integer array (atom.resi is stored as int).
+          // Comma-string "287,288" does NOT work — 3Dmol only parses strings as ranges ("287-294").
+          const resnums: number[] = pocketResidues
             .map(r => parseInt(r.replace(/[^0-9]/g, ""), 10))
             .filter(n => !isNaN(n) && n > 0);
           if (resnums.length > 0) {
-            const resiStr = resnums.join(",");
             viewer.setStyle(
-              { resi: resiStr },
+              { resi: resnums },
               {
                 cartoon: { color: "#0ea5e9", opacity: 1.0, thickness: 0.5 },
                 stick: { colorscheme: "cyanCarbon", radius: 0.25, opacity: 1.0 },
@@ -78,7 +78,7 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
             viewer.addSurface(
               window.$3Dmol.SurfaceType.SAS,
               { opacity: 0.30, color: "#0ea5e9" },
-              { resi: resiStr }
+              { resi: resnums }
             );
           }
         }
