@@ -1,0 +1,427 @@
+{
+  "database": "Pharmacological Chaperone Database (PCD)",
+  "version": "1.0.0",
+  "build_date": "2026-05-19",
+  "investigator": "Aaryan Senthilvanan",
+  "institution": "S.Y.A.L.I.S Labs",
+  "powered_by": "REFOLD \u2014 Rescue-classification, ENM, FPocket, On-the-fly Ligand Design",
+  "total_entries": 2,
+  "entries": [
+    {
+      "entry_id": "PCD-GBA1-L444P",
+      "investigator": "Aaryan Senthilvanan",
+      "institution": "S.Y.A.L.I.S Labs",
+      "metadata": {
+        "gene": "GBA1",
+        "uniprot": "P04062",
+        "clinvar_id": "4288",
+        "disease": "Gaucher Disease Type 1",
+        "mutation_precursor": "L483P",
+        "mutation_mature": "L444P",
+        "variant_class": "pathogenic",
+        "mechanism": "ER retention / ERAD \u2014 misfolded \u03b2-glucocerebrosidase fails ER quality control"
+      },
+      "pocket": {
+        "target_conformation": "MT conformation 10 (seed=110, ANM L444P ensemble)",
+        "n_conformations_sampled": 25,
+        "fpocket_druggability": 0.926,
+        "volume_angstrom3": 462.6,
+        "alpha_sphere_count": 63,
+        "center_angstrom": [
+          8.003,
+          -3.989,
+          16.1
+        ],
+        "wt_baseline_druggability": 0.183,
+        "exceeds_threshold": true,
+        "pocket_type": "TRANSIENT_MISFOLDING \u2014 absent in WT, exposes in L444P mutant ensemble",
+        "dist_mutation_to_pocket_angstrom": 23.5
+      },
+      "sequence": {
+        "fasta_header": ">P04062|GBA1_HUMAN|L444P mutant (precursor 536 AA)",
+        "fasta_sequence": "MEFSSPSREECPKPLSRVSIMAGSLTGLLLLQAVSWASGARPCIPKSFGYSSVVCVCNATYCDSFDPPTFPALGTFSRYESTRSGRRMELSMGPIQANHTGTGLLLTLQPEQKFQKVKGFGGAMTDAAALNILALSPPAQNLLLKSYFSEEGIGYNIIRVPMASCDFSIRTYTYADTPDDFQLHNFSLPEEDTKLKIPLIHRALQLAQRPVSLLASPWTSPTWLKTNGAVNGKGSLKGQPGDIYHQTWARYFVKFLDAYAEHKLQFWAVTAENEPSAGLLSGYPFQCLGFTPEHQRDFIARDLGPTLANSTHHNVRLLMLDDQRLLLPHWAKVVLTDPEAAKYVHGIAVHWYLDFLAPAKATLGETHRLFPNTMLFASEACVGSKFWEQSVRLGSWDRGMQYSHSIITNLLYHVVGWTDWNLALNPEGGPNWVRNFVDSPIIVDITKDTFYKQPMFYHLGHFSKFIPEGSQRVGLVASQKNDPDAVALMHPDGSAVVVVLNRSSKDVPLTIKDPAVGFLETISPGYSIHTYLWRRQ",
+        "pocket_lining_positions_precursor": [
+          40,
+          41,
+          42,
+          43,
+          63,
+          64,
+          65,
+          87,
+          88,
+          89,
+          90
+        ],
+        "pocket_lining_residues": "A40-R41-P42-C43-D63-S64-F65-R87-M88-E89-L90",
+        "pocket_lining_1letter": "ARPCDSFRMMEL",
+        "sequence_slice_around_pocket": "ARPCIPKSFGYSSVVCVCNATYCDSFDPPTFPALGTFSRYESTRSGRRMELS"
+      },
+      "eij_matrix": {
+        "file": "data/results/GBA_L444P/E_ij_matrix_MT10_pocket1.npy",
+        "shape": [
+          11,
+          11
+        ],
+        "residue_labels": [
+          "A40",
+          "R41",
+          "P42",
+          "C43",
+          "D63",
+          "S64",
+          "F65",
+          "R87",
+          "M88",
+          "E89",
+          "L90"
+        ],
+        "values": [
+          [
+            0.0,
+            3.822,
+            6.513,
+            9.717,
+            7.146,
+            5.051,
+            4.431,
+            11.524,
+            10.739,
+            9.871,
+            9.99
+          ],
+          [
+            3.822,
+            0.0,
+            3.868,
+            6.894,
+            4.658,
+            4.934,
+            6.681,
+            10.835,
+            11.353,
+            10.688,
+            12.024
+          ],
+          [
+            6.513,
+            3.868,
+            0.0,
+            3.825,
+            5.034,
+            6.839,
+            8.235,
+            8.013,
+            9.529,
+            8.657,
+            11.033
+          ],
+          [
+            9.717,
+            6.894,
+            3.825,
+            0.0,
+            5.015,
+            8.103,
+            10.147,
+            6.779,
+            9.512,
+            9.747,
+            12.925
+          ],
+          [
+            7.146,
+            4.658,
+            5.034,
+            5.015,
+            0.0,
+            3.823,
+            7.14,
+            9.235,
+            10.4,
+            11.25,
+            13.424
+          ],
+          [
+            5.051,
+            4.934,
+            6.839,
+            8.103,
+            3.823,
+            0.0,
+            3.801,
+            10.126,
+            9.821,
+            10.754,
+            11.919
+          ],
+          [
+            4.431,
+            6.681,
+            8.235,
+            10.147,
+            7.14,
+            3.801,
+            0.0,
+            9.962,
+            8.295,
+            8.908,
+            9.02
+          ],
+          [
+            11.524,
+            10.835,
+            8.013,
+            6.779,
+            9.235,
+            10.126,
+            9.962,
+            0.0,
+            3.831,
+            5.399,
+            9.024
+          ],
+          [
+            10.739,
+            11.353,
+            9.529,
+            9.512,
+            10.4,
+            9.821,
+            8.295,
+            3.831,
+            0.0,
+            3.861,
+            6.32
+          ],
+          [
+            9.871,
+            10.688,
+            8.657,
+            9.747,
+            11.25,
+            10.754,
+            8.908,
+            5.399,
+            3.861,
+            0.0,
+            3.84
+          ],
+          [
+            9.99,
+            12.024,
+            11.033,
+            12.925,
+            13.424,
+            11.919,
+            9.02,
+            9.024,
+            6.32,
+            3.84,
+            0.0
+          ]
+        ]
+      },
+      "chaperone": {
+        "smiles": "O=C(NCc1ccc(O)c(N2CCCCC2)c1)C1CCNCC1",
+        "iupac_name": "4-piperidinyl-N-(4-hydroxy-3-piperidinylbenzyl)carboxamide analog",
+        "common_name": "REFOLD-PC-GBA1-001",
+        "composite_score": 0.9564,
+        "mw": 317.21,
+        "logp": 1.998,
+        "qed": 0.7946,
+        "sa_score": 2.7,
+        "hbd": 3,
+        "hba": 4,
+        "tpsa": 64.6,
+        "lipinski": true,
+        "veber": true,
+        "pains": false,
+        "pocket_affinity_score": 0.9978,
+        "binding_mode": {
+          "primary_hbond": "Pip-NH \u2192 D24 carboxylate (salt bridge ~2.6 \u00c5)",
+          "secondary_hbond": "Amide C=O \u2190 R2 guanidinium (~2.8 \u00c5)",
+          "phenol_hbond": "Phenol-OH \u2192 D24 O\u03b4 (~2.5 \u00c5)",
+          "aromatic_stacking": "Phenyl \u03c0-\u03c0 with F26 (~4.5 \u00c5 T-shaped)",
+          "hydrophobic": "Pip ring vdW with P3, A1, M49, L51",
+          "salt_bridge": "N-aryl-pip \u2192 E50 carboxylate (~3.0 \u00c5)"
+        }
+      },
+      "assets": {
+        "eij_matrix_npy": "data/results/GBA_L444P/E_ij_matrix_MT10_pocket1.npy",
+        "eij_matrix_csv": "data/results/GBA_L444P/E_ij_matrix_MT10_pocket1.csv",
+        "transient_conformation_pdb": "data/results/GBA_L444P/conformations/mt_10.pdb",
+        "pocket_summary_json": "data/results/GBA_L444P/MT10_pocket1_summary.json",
+        "stage3_candidates_json": "data/results/GBA_L444P/stage3_chaperone_candidates.json",
+        "pdb_structure": "/structures/PCD-GBA1-L444P.pdb"
+      },
+      "status": "COMPLETE"
+    },
+    {
+      "entry_id": "PCD-CFTR-G85E",
+      "investigator": "Aaryan Senthilvanan",
+      "institution": "S.Y.A.L.I.S Labs",
+      "metadata": {
+        "gene": "CFTR",
+        "uniprot": "P13569",
+        "clinvar_id": "7107",
+        "disease": "Cystic Fibrosis",
+        "mutation_precursor": "G85E",
+        "mutation_mature": "G85E",
+        "variant_class": "pathogenic",
+        "mechanism": "Class II \u2014 TM2 helix disruption collapses TM1-TM2 packing, causes ERAD retention"
+      },
+      "pocket": {
+        "target_conformation": "MT conformations 1-15 (detection_freq=1.00, persistent across all mutant ensemble frames)",
+        "n_conformations_sampled": 15,
+        "fpocket_druggability": 0.807,
+        "volume_angstrom3": 484.0,
+        "alpha_sphere_count": "~35 (TMD1 focus)",
+        "center_angstrom": [
+          -5.458,
+          19.942,
+          -22.066
+        ],
+        "wt_baseline_druggability": 0.003,
+        "exceeds_threshold": true,
+        "pocket_type": "ICL1-TM2 junction \u2014 VX-809 canonical site destroyed (drug=0.003), alternative allosteric pocket exposed",
+        "dist_mutation_to_pocket_angstrom": 11.3
+      },
+      "sequence": {
+        "fasta_header": ">P13569|CFTR_HUMAN|G85E mutant (1480 AA)",
+        "fasta_sequence": "MQRSPLEKASVVSKLFFSWTRPILRKGYRQRLELSDIYQIPSVDSADNLSEKLEREWDRELASKKNPKLINALRRCFFWRFMFYEIFLYLGEVTKAVQPLLLGRIIASYDPDNKEERSIAIYLGIGLCLLFIVRTLLLHPAIFGLHHIGMQMRIAMFSLIYKKTLKLSSRVLDKISIGQLVSLLSNNLNKFDEGLALAHFVWIAPLQVALLMGLIWELLQASAFCGLGFLIVLALFQAGLGRMMMKYRDQRAGKISERLVITSEMIENIQSVKAYCWEEAMEKMIENLRQTELKLTRKAAYVRYFNSSAFFFSGFFVVFLSVLPYALIKGIILRKIFTTISFCIVLRMAVTRQFPWAVQTWYDSLGAINKIQDFLQKQEYKTLEYNLTTTEVVMENVTAFWEEGFGELFEKAKQNNNNRKTSNGDDSLFFSNFSLLGTPVLKDINFKIERGQLLAVAGSTGAGKTSLLMVIMGELEPSEGKIKHSGRISFCSQFSWIMPGTIKENIIFGVSYDEYRYRSVIKACQLEEDISKFAEKDNIVLGEGGITLSGGQRARISLARAVYKDADLYLLDSPFGYLDVLTEKEIFESCVCKLMANKTRILVTSKMEHLKKADKILILHEGSSYFYGTFSELQNLQPDFSSKLMGCDSFDQFSAERRNSILTETLHRFSLEGDAPVSWTETKKQSFKQTGEFGEKRKNSILNPINSIRKFSIVQKTPLQMNGIEEDSDEPLERRLSLVPDSEQGEAILPRISVISTGPTLQARRRQSVLNLMTHSVNQGQNIHRKTTASTRKVSLAPQANLTELDIYSRRLSQETGLEISEEINEEDLKECFFDDMESIPAVTTWNTYLRYITVHKSLIFVLIWCLVIFLAEVAASLVVLWLLGNTPLQDKGNSTHSRNNSYAVIITSTSSYYVFYIYVGVADTLLAMGFFRGLPLVHTLITVSKILHHKMLHSVLQAPMSTLNTLKAGGILNRFSKDIAILDDLLPLTIFDFIQLLLIVIGAIAVVAVLQPYIFVATVPVIVAFIMLRAYFLQTSQQLKQLESEGRSPIFTHLVTSLKGLWTLRAFGRQPYFETLFHKALNLHTANWFLYLSTLRWFQMRIEMIFVIFFIAVTFISILTTGEGEGRVGIILTLAMNIMSTLQWAVNSSIDVDSLMRSVSRVFKFIDMPTEGKPTKSTKPYKNGQLSKVMIIENSHVKKDDIWPSGGQMTVKDLTAKYTEGGNAILENISFSISPGQRVGLLGRTGSGKSTLLSAFLRLLNTEGEIQIDGVSWDSITLQQWRKAFGVIPQKVFIFSGTFRKNLDPYEQWSDQEIWKVADEVGLRSVIEQFPGKLDFVLVDGGCVLSHGHKQLMCLARSVLSKAKILLLDEPSAHLDPVTYQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQAISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL",
+        "pocket_lining_positions": [
+          70,
+          73,
+          74,
+          77,
+          78,
+          81,
+          195
+        ],
+        "pocket_lining_residues": "I70-L73-R74-F77-F78-F81-L195",
+        "pocket_lining_1letter": "ILRFFFL",
+        "sequence_slice_around_pocket": "KLINALRRCFFWRFMFYE"
+      },
+      "eij_matrix": {
+        "file": "data/results/CFTR_G85E/E_ij_matrix.npy",
+        "shape": [
+          7,
+          7
+        ],
+        "residue_labels": [
+          "I70",
+          "L73",
+          "R74",
+          "F77",
+          "F78",
+          "F81",
+          "L195"
+        ],
+        "values": [
+          [
+            0.0,
+            5.015,
+            5.955,
+            10.217,
+            10.23,
+            13.398,
+            13.966
+          ],
+          [
+            5.015,
+            0.0,
+            3.867,
+            6.02,
+            7.553,
+            10.861,
+            13.182
+          ],
+          [
+            5.955,
+            3.867,
+            0.0,
+            5.473,
+            4.876,
+            9.275,
+            13.427
+          ],
+          [
+            10.217,
+            6.02,
+            5.473,
+            0.0,
+            3.874,
+            6.182,
+            11.683
+          ],
+          [
+            10.23,
+            7.553,
+            4.876,
+            3.874,
+            0.0,
+            5.048,
+            11.809
+          ],
+          [
+            13.398,
+            10.861,
+            9.275,
+            6.182,
+            5.048,
+            0.0,
+            8.6
+          ],
+          [
+            13.966,
+            13.182,
+            13.427,
+            11.683,
+            11.809,
+            8.6,
+            0.0
+          ]
+        ]
+      },
+      "chaperone": {
+        "smiles": "O=C(c1cc(F)ccc1F)N1CCN(Cc2ccccc2)CC1",
+        "iupac_name": "1-benzyl-4-(2,4-difluorobenzoyl)piperazine",
+        "common_name": "REFOLD-PC-CFTR-001",
+        "composite_score": 0.9074,
+        "mw": 316.35,
+        "logp": 2.923,
+        "qed": 0.869,
+        "sa_score": 1.7,
+        "hbd": 0,
+        "hba": 2,
+        "tpsa": 32.0,
+        "lipinski": true,
+        "veber": true,
+        "pains": false,
+        "pocket_affinity_score": 1.0,
+        "binding_mode": {
+          "primary_aromatic": "2,4-F-phenyl \u03c0-stack with F77/F78 (T-shaped, ~4.5 \u00c5)",
+          "secondary_aromatic": "Benzyl ring contacts F81 (~4.5 \u00c5)",
+          "hbond": "Carbonyl C=O \u2190 R74 guanidinium NH\u2082 (~2.7 \u00c5)",
+          "hydrophobic_n": "Piperazine CH\u2082 contacts I70, L73 (CH-\u03c0, ~3.8 \u00c5)",
+          "back_wall": "N-benzyl contacts L195 vdW (~4.0 \u00c5)"
+        }
+      },
+      "assets": {
+        "eij_matrix_npy": "data/results/CFTR_G85E/E_ij_matrix.npy",
+        "eij_matrix_csv": "data/results/CFTR_G85E/E_ij_matrix.csv",
+        "transient_conformation_pdb": "data/results/CFTR_G85E/conformations/mt_01.pdb",
+        "pocket_summary_json": "data/results/CFTR_G85E/pocket_summary.json",
+        "stage3_candidates_json": "data/results/CFTR_G85E/stage3_chaperone_candidates.json",
+        "pdb_structure": "/structures/PCD-CFTR-G85E.pdb"
+      },
+      "status": "COMPLETE"
+    }
+  ],
+  "proteome_targets": {
+    "total_clinvar_pathogenic_missense": 8247,
+    "total_processed": 2,
+    "queue_remaining": 8245
+  }
+}
