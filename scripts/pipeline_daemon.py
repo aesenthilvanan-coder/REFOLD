@@ -209,17 +209,29 @@ def save_atlas(atlas: dict):
     log.info(f"Atlas synced locally ({atlas['total_entries']} entries)")
 
 
-def push_to_github(atlas: dict):
-    """Commit and push atlas JSON to GitHub data repo so the live website updates."""
+ATLAS_RAW_BASE = "https://raw.githubusercontent.com/aesenthilvanan-coder/pcd-atlas-data/main"
+
+
+def push_to_github(atlas: dict, pdb_src: Path | None = None, entry_id: str | None = None):
+    """Commit and push atlas JSON (+ optional PDB) to pcd-atlas-data repo."""
     if not GITHUB_DATA_REPO.exists():
         log.warning("GitHub data repo not found — skipping push")
         return
     try:
         shutil.copy(ATLAS_FILE, GITHUB_DATA_REPO / "PCD_global_atlas.json")
+        files_to_add = ["PCD_global_atlas.json"]
+
+        if pdb_src and pdb_src.exists() and entry_id:
+            struct_dir = GITHUB_DATA_REPO / "structures"
+            struct_dir.mkdir(exist_ok=True)
+            dest = struct_dir / f"{entry_id}.pdb"
+            shutil.copy(pdb_src, dest)
+            files_to_add.append(f"structures/{entry_id}.pdb")
+
         n = atlas["total_entries"]
-        entry_id = atlas["entries"][-1]["entry_id"] if atlas["entries"] else "?"
-        msg = f"Add {entry_id} — {n} total entries"
-        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add", "PCD_global_atlas.json"],
+        eid = entry_id or (atlas["entries"][-1]["entry_id"] if atlas["entries"] else "?")
+        msg = f"Add {eid} — {n} total entries"
+        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add"] + files_to_add,
                        check=True, capture_output=True)
         subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "commit", "-m", msg],
                        check=True, capture_output=True)
@@ -320,7 +332,7 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
     """Assemble a complete PCDEntry dict."""
     now = datetime.now(timezone.utc).isoformat()
     pdb_src = next(work_dir.glob("conformations/mt_*.pdb"), None)
-    pdb_public = f"/structures/{entry_id}.pdb"
+    pdb_public = f"{ATLAS_RAW_BASE}/structures/{entry_id}.pdb"
     if pdb_src:
         shutil.copy(pdb_src, PUBLIC_PDB / f"{entry_id}.pdb")
 
@@ -416,7 +428,8 @@ def process_variant(variant: dict, state: dict, atlas: dict) -> str:
         atlas["total_entries"] = len(atlas["entries"])
         _update_proteome_count(atlas, state)
         save_atlas(atlas)
-        push_to_github(atlas)   # live website auto-updates — no redeploy needed
+        pdb_src = next(work_dir.glob("conformations/mt_*.pdb"), None)
+        push_to_github(atlas, pdb_src=pdb_src, entry_id=entry_id)
 
         log.info(f"✓ {entry_id} — drug={drug_score:.3f} — composite={chaperone.get('composite_score',0):.3f}")
         return "complete"
