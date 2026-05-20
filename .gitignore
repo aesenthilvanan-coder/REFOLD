@@ -66,3 +66,4 @@ data/clinvar_pathogenic_missense.tsv
 
 # AlphaFold structure cache (downloaded on demand)
 data/raw/alphafold/
+.vercel
