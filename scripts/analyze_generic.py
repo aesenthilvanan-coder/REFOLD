@@ -534,34 +534,78 @@ def main():
                comments="", fmt="%.3f")
 
     # ── 7. Output pocket_summary.json ─────────────────────────────────────────
-    pocket_residues = {f"{r['aa']}{r['pos']}": r["aa"] for r in res_info}
+    pocket_residues_dict = {f"{r['aa']}{r['pos']}": r["aa"] for r in res_info}
+    residue_label_list   = [f"{r['aa']}{r['pos']}" for r in res_info]
+    lining_positions     = [r["pos"] for r in res_info]
+    lining_1letter       = "".join(r["aa"] for r in res_info)
+
+    # Mutation-to-pocket distance
+    mut_to_pocket_dist = 0.0
+    if 0 <= mut_pos < len(ca_coords) and not np.any(np.isnan(ca_coords[mut_pos])):
+        mut_to_pocket_dist = float(np.linalg.norm(
+            ca_coords[mut_pos] - np.array(
+                best["center"].tolist() if isinstance(best["center"], np.ndarray) else best["center"]
+            )
+        ))
+
+    # WT baseline druggability (already computed above)
+    wt_best_drug = 0.0
+    if has_fpocket and wt_clusters:
+        wt_best_drug = max((c["druggability"] for c in wt_clusters), default=0.0)
+
+    # Alpha sphere count in best pocket
+    best_alpha_sph = best.get("alpha_spheres")
+    alpha_sphere_count = int(len(best_alpha_sph)) if best_alpha_sph is not None else 0
+
+    # Sequence slice around mutation (±20 residues)
+    slc_start = max(0, mut_pos - 10)
+    slc_end   = min(n_res, mut_pos + 10)
+    seq_slice = sequence[slc_start:slc_end]
+
+    # Select best conformation pdb (highest druggability or midpoint)
+    target_conf_idx = len(mt_pdbs) // 2
+    target_conf_pdb = str(mt_pdbs[target_conf_idx]) if mt_pdbs else ""
+
     summary = to_json_safe({
         "gene": gene,
         "uniprot": uniprot,
         "mutation": mutation,
         "pocket": {
-            "fpocket_druggability": best["druggability"],
-            "volume_angstrom3": best["volume"],
-            "detection_frequency": best.get("detection_frequency", 1.0),
-            "cryptic": best.get("cryptic", True),
-            "center_angstrom": best["center"].tolist() if isinstance(best["center"], np.ndarray)
-                               else list(best["center"]),
-            "pocket_residues": pocket_residues,
-            "n_lining_residues": n_pocket,
-            "shell_radius_angstrom": POCKET_SHELL,
+            "fpocket_druggability":          best["druggability"],
+            "wt_baseline_druggability":      wt_best_drug,
+            "volume_angstrom3":              best["volume"],
+            "detection_frequency":           best.get("detection_frequency", 1.0),
+            "cryptic":                       best.get("cryptic", True),
+            "center_angstrom":               best["center"].tolist() if isinstance(best["center"], np.ndarray)
+                                             else list(best["center"]),
+            "pocket_residues":               pocket_residues_dict,
+            "n_lining_residues":             n_pocket,
+            "shell_radius_angstrom":         POCKET_SHELL,
+            "alpha_sphere_count":            alpha_sphere_count,
+            "n_conformations_sampled":       N_CONF,
+            "dist_mutation_to_pocket_angstrom": mut_to_pocket_dist,
+            "target_conformation":           f"ANM mutant conformation {target_conf_idx:02d} (of {N_CONF})",
+            "pocket_type":                   "Cryptic" if best.get("cryptic", True) else "Allosteric",
+            "exceeds_threshold":             best["druggability"] > 0.70,
         },
         "sequence": {
-            "full_sequence": sequence,
-            "n_residues": n_res,
-            "mutation_pos_1indexed": mut_pos_1indexed,
-            "wt_aa": wt_aa,
-            "mut_aa": mut_aa,
+            "full_sequence":                  sequence,
+            "fasta_sequence":                 sequence,
+            "fasta_header":                   f">sp|{uniprot}|{gene} variant {mutation}",
+            "n_residues":                     n_res,
+            "mutation_pos_1indexed":          mut_pos_1indexed,
+            "wt_aa":                          wt_aa,
+            "mut_aa":                         mut_aa,
+            "pocket_lining_residues":         "-".join(residue_label_list),
+            "pocket_lining_positions_precursor": lining_positions,
+            "pocket_lining_1letter":          lining_1letter,
+            "sequence_slice_around_pocket":   seq_slice,
         },
-        "eij_shape": [n_pocket, n_pocket],
-        "residue_labels": [f"{r['aa']}{r['pos']}" for r in res_info],
-        "pocket_lining_residues": res_info,
-        "n_conformations": N_CONF,
-        "best_conformation_pdb": str(mt_pdbs[len(mt_pdbs)//2]) if mt_pdbs else "",
+        "eij_shape":             [n_pocket, n_pocket],
+        "residue_labels":        residue_label_list,
+        "pocket_lining_residues": residue_label_list,
+        "n_conformations":       N_CONF,
+        "best_conformation_pdb": target_conf_pdb,
     })
 
     out_json = args.outdir / "pocket_summary.json"

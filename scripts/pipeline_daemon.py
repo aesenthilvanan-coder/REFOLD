@@ -329,7 +329,7 @@ def run_stage3(variant: dict, pocket_summary: dict, work_dir: Path) -> dict | No
 
 def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
                        entry_id: str, work_dir: Path) -> dict:
-    """Assemble a complete PCDEntry dict."""
+    """Assemble a complete PCDEntry dict matching the GBA1/CFTR schema."""
     now = datetime.now(timezone.utc).isoformat()
     pdb_src = next(work_dir.glob("conformations/mt_*.pdb"), None)
     pdb_public = f"{ATLAS_RAW_BASE}/structures/{entry_id}.pdb"
@@ -346,6 +346,63 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
             for row in reader:
                 eij_values.append([round(float(x), 3) for x in row])
 
+    # Pocket — merge raw pocket dict with computed fields
+    raw_pocket = pocket_summary.get("pocket", {})
+
+    # Sequence — use enriched sequence section from analyze_generic.py
+    raw_seq = pocket_summary.get("sequence", {})
+    # pocket_lining_residues at top level is a list of label strings e.g. ["A123","R124"]
+    lining_labels = pocket_summary.get("pocket_lining_residues", [])
+    if isinstance(lining_labels, list) and lining_labels and isinstance(lining_labels[0], dict):
+        # Old format: list of dicts — convert
+        lining_labels = [f"{r['aa']}{r['pos']}" for r in lining_labels]
+
+    lining_str = raw_seq.get("pocket_lining_residues") or "-".join(lining_labels)
+    lining_positions = raw_seq.get("pocket_lining_positions_precursor") or [
+        int("".join(c for c in s if c.isdigit())) for s in lining_labels if any(c.isdigit() for c in s)
+    ]
+    fasta_seq = raw_seq.get("fasta_sequence") or raw_seq.get("full_sequence", "")
+    full_seq   = raw_seq.get("full_sequence", fasta_seq)
+    mut_pos    = raw_seq.get("mutation_pos_1indexed", 0)
+    slc_start  = max(0, mut_pos - 11)
+    slc_end    = min(len(full_seq), mut_pos + 9)
+    seq_slice  = raw_seq.get("sequence_slice_around_pocket") or full_seq[slc_start:slc_end]
+
+    pocket_section = {
+        "target_conformation":               raw_pocket.get("target_conformation",
+                                              f"ANM mutant conformation (of {raw_pocket.get('n_conformations_sampled', 20)})"),
+        "n_conformations_sampled":           raw_pocket.get("n_conformations_sampled", 20),
+        "fpocket_druggability":              raw_pocket.get("fpocket_druggability", 0.0),
+        "wt_baseline_druggability":          raw_pocket.get("wt_baseline_druggability", 0.0),
+        "volume_angstrom3":                  raw_pocket.get("volume_angstrom3", 0.0),
+        "alpha_sphere_count":                raw_pocket.get("alpha_sphere_count", 0),
+        "center_angstrom":                   raw_pocket.get("center_angstrom", [0.0, 0.0, 0.0]),
+        "dist_mutation_to_pocket_angstrom":  raw_pocket.get("dist_mutation_to_pocket_angstrom", 0.0),
+        "exceeds_threshold":                 raw_pocket.get("exceeds_threshold", True),
+        "pocket_type":                       raw_pocket.get("pocket_type",
+                                              "Cryptic" if raw_pocket.get("cryptic", True) else "Allosteric"),
+        "detection_frequency":               raw_pocket.get("detection_frequency", 1.0),
+        "cryptic":                           raw_pocket.get("cryptic", True),
+        "pocket_residues":                   raw_pocket.get("pocket_residues", {}),
+        "n_lining_residues":                 raw_pocket.get("n_lining_residues", len(lining_labels)),
+        "shell_radius_angstrom":             raw_pocket.get("shell_radius_angstrom", 8.0),
+    }
+
+    sequence_section = {
+        "fasta_header":                   raw_seq.get("fasta_header",
+                                           f">sp|{variant['uniprot']}|{variant['gene']} variant {variant['mutation_mature']}"),
+        "fasta_sequence":                 fasta_seq,
+        "full_sequence":                  full_seq,
+        "n_residues":                     raw_seq.get("n_residues", len(fasta_seq)),
+        "mutation_pos_1indexed":          mut_pos,
+        "wt_aa":                          raw_seq.get("wt_aa", ""),
+        "mut_aa":                         raw_seq.get("mut_aa", ""),
+        "pocket_lining_residues":         lining_str,
+        "pocket_lining_positions_precursor": lining_positions,
+        "pocket_lining_1letter":          raw_seq.get("pocket_lining_1letter", "".join(s[0] for s in lining_labels if s)),
+        "sequence_slice_around_pocket":   seq_slice,
+    }
+
     return {
         "entry_id":    entry_id,
         "investigator": "Aaryan Senthilvanan",
@@ -360,12 +417,12 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
             "variant_class":      "pathogenic",
             "mechanism":          variant["mechanism"],
         },
-        "pocket":   pocket_summary.get("pocket", {}),
-        "sequence": pocket_summary.get("sequence", {}),
+        "pocket":   pocket_section,
+        "sequence": sequence_section,
         "eij_matrix": {
             "file":           str(work_dir / "E_ij_matrix.npy"),
             "shape":          pocket_summary.get("eij_shape", [0, 0]),
-            "residue_labels": pocket_summary.get("residue_labels", []),
+            "residue_labels": pocket_summary.get("residue_labels", lining_labels),
             "values":         eij_values,
         },
         "chaperone": chaperone,
