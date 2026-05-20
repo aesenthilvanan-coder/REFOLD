@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd pcd-website && npm install && npm run build",
+  "outputDirectory": "pcd-website/.next",
+  "installCommand": "cd pcd-website && npm install",
+  "rootDirectory": "pcd-website"
+}
