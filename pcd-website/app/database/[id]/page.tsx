@@ -1,10 +1,10 @@
 import Link from "next/link";
-import atlasRaw from "../../../public/PCD_global_atlas.json";
-import { PCDAtlas, PCDEntry } from "../../types";
+import { PCDEntry } from "../../types";
 import { notFound } from "next/navigation";
 import { MolViewer } from "../../components/MolViewer";
+import { fetchAtlas } from "../../lib/atlas";
 
-const atlas = atlasRaw as unknown as PCDAtlas;
+export const dynamic = "force-dynamic";
 
 function ScoreRow({ label, value, color = "var(--accent)", max = 1 }: {
   label: string; value: number; color?: string; max?: number;
@@ -90,6 +90,7 @@ function EijHeatmap({ labels, values }: { labels: string[]; values: number[][] }
 
 export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const atlas = await fetchAtlas();
   const entry: PCDEntry | undefined = atlas.entries.find(e => e.entry_id === id);
   if (!entry) notFound();
 
