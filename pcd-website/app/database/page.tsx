@@ -15,36 +15,40 @@ function ScoreBar({ value, color = "var(--accent)" }: { value: number; color?: s
   );
 }
 
-function EntryRow({ entry }: { entry: PCDEntry }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function EntryRow({ entry }: { entry: any }) {
+  const meta = entry.metadata ?? {};
+  const pkt  = entry.pocket   ?? {};
+  const chap = entry.chaperone ?? {};
   return (
     <Link href={`/database/${entry.entry_id}`} className="block group">
       <div className="card-hover rounded-lg p-4 grid grid-cols-12 gap-4 items-center">
         <div className="col-span-12 sm:col-span-3 space-y-1.5">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="tag tag-cyan">{entry.metadata.gene}</span>
-            <span className="tag tag-amber">{entry.metadata.mutation_mature}</span>
+            <span className="tag tag-cyan">{meta.gene}</span>
+            <span className="tag tag-amber">{meta.mutation_mature}</span>
           </div>
           <div className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{entry.entry_id}</div>
         </div>
         <div className="col-span-12 sm:col-span-3">
-          <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{entry.metadata.disease}</div>
-          <div className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>{entry.metadata.mechanism}</div>
+          <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{meta.disease}</div>
+          <div className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>{meta.mechanism}</div>
         </div>
         <div className="col-span-12 sm:col-span-3 space-y-2">
           <div>
             <div className="data-label mb-1">fpocket Drug.</div>
-            <ScoreBar value={entry.pocket.fpocket_druggability} />
+            <ScoreBar value={pkt.fpocket_druggability ?? 0} />
           </div>
           <div>
             <div className="data-label mb-1">Chaperone Score</div>
-            <ScoreBar value={entry.chaperone.composite_score} color="var(--violet)" />
+            <ScoreBar value={chap.composite_score ?? 0} color="var(--violet)" />
           </div>
         </div>
         <div className="col-span-12 sm:col-span-2 grid grid-cols-3 gap-2 text-center">
           {[
-            { v: entry.chaperone.mw.toFixed(0), l: "MW" },
-            { v: entry.chaperone.logp.toFixed(1), l: "logP" },
-            { v: entry.chaperone.qed.toFixed(2), l: "QED" },
+            { v: (chap.mw ?? 0).toFixed(0), l: "MW" },
+            { v: (chap.logp ?? 0).toFixed(1), l: "logP" },
+            { v: (chap.qed ?? 0).toFixed(2), l: "QED" },
           ].map(p => (
             <div key={p.l}>
               <div className="text-xs font-bold font-mono" style={{ color: "var(--text-primary)" }}>{p.v}</div>
@@ -67,10 +71,17 @@ export default function DatabasePage() {
   const [sortKey, setSortKey] = useState<"fpocket" | "score" | "mw">("fpocket");
 
   useEffect(() => {
-    fetch(ATLAS_RAW_URL, { cache: "no-store" })
-      .then(r => r.json())
-      .then(setAtlas)
-      .catch(console.error);
+    let mounted = true;
+    const load = () =>
+      fetch(ATLAS_RAW_URL, { cache: "no-store" })
+        .then(r => r.json())
+        .then(data => { if (mounted) setAtlas(data); })
+        .catch(console.error);
+
+    load();
+    // Poll every 30 s — shows new entries without a manual refresh
+    const timer = setInterval(load, 30_000);
+    return () => { mounted = false; clearInterval(timer); };
   }, []);
 
   const filtered = useMemo(() => {
@@ -144,7 +155,8 @@ export default function DatabasePage() {
                 {[
                   { label: "Total Entries", value: atlas.total_entries },
                   { label: "Avg Drug Score",
-                    value: (atlas.entries.reduce((s, e) => s + e.pocket.fpocket_druggability, 0) / atlas.entries.length).toFixed(3) },
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    value: (atlas.entries.reduce((s: number, e: any) => s + (e.pocket?.fpocket_druggability ?? 0), 0) / atlas.entries.length).toFixed(3) },
                   { label: "Diseases",
                     value: new Set(atlas.entries.map(e => e.metadata.disease)).size },
                 ].map(s => (

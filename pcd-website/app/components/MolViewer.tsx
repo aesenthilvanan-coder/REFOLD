@@ -61,21 +61,24 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
 
         // Pocket-lining residues — highlighted in accent cyan
         if (pocketResidues.length > 0) {
-          // Parse residue numbers from labels like "A40", "R41"
-          const resnums = pocketResidues.map(r => parseInt(r.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
+          // Parse residue numbers — use comma-separated string (most reliable format in 3Dmol.js)
+          const resnums = pocketResidues
+            .map(r => parseInt(r.replace(/[^0-9]/g, ""), 10))
+            .filter(n => !isNaN(n) && n > 0);
           if (resnums.length > 0) {
+            const resiStr = resnums.join(",");
             viewer.setStyle(
-              { resi: resnums },
+              { resi: resiStr },
               {
                 cartoon: { color: "#0ea5e9", opacity: 1.0, thickness: 0.5 },
-                stick: { colorscheme: "cyanCarbon", radius: 0.2, opacity: 0.9 },
+                stick: { colorscheme: "cyanCarbon", radius: 0.25, opacity: 1.0 },
               }
             );
-            // Add transparent surface over pocket
+            // Transparent surface over pocket residues
             viewer.addSurface(
               window.$3Dmol.SurfaceType.SAS,
-              { opacity: 0.25, color: "#0ea5e9" },
-              { resi: resnums }
+              { opacity: 0.30, color: "#0ea5e9" },
+              { resi: resiStr }
             );
           }
         }
