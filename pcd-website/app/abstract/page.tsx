@@ -2,91 +2,75 @@ import Link from "next/link";
 
 // ── Pipeline SVG diagram — fully self-contained, no external deps ────────────
 function PipelineDiagram() {
-  const box = (x: number, y: number, w: number, h: number, label: string, sub: string, color: string, tag?: string) => (
-    <g key={label}>
-      <rect x={x} y={y} width={w} height={h} rx={8}
-            fill={color === "cyan" ? "#0c1f2e" : color === "violet" ? "#140e24" : "#0e1a0e"}
-            stroke={color === "cyan" ? "#0ea5e9" : color === "violet" ? "#8b5cf6" : "#22c55e"}
-            strokeWidth={1.5} />
-      {tag && (
-        <text x={x + 10} y={y + 14} fontSize={8} fontFamily="monospace"
-              fill={color === "cyan" ? "#0ea5e9" : color === "violet" ? "#8b5cf6" : "#22c55e"}>
-          {tag}
-        </text>
-      )}
-      <text x={x + w / 2} y={y + (tag ? h / 2 + 6 : h / 2 - 4)} fontSize={12} fontWeight="bold"
-            textAnchor="middle" fill="white" fontFamily="system-ui">
-        {label}
-      </text>
-      <text x={x + w / 2} y={y + (tag ? h / 2 + 21 : h / 2 + 11)} fontSize={9}
-            textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">
-        {sub}
-      </text>
-    </g>
-  );
 
-  const arrow = (x1: number, y1: number, x2: number, y2: number) => (
-    <g key={`${x1}-${x2}`}>
-      <defs>
-        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#334155" />
-        </marker>
-      </defs>
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth={1.5} markerEnd="url(#arr)" />
-    </g>
-  );
-
-  const label = (x: number, y: number, txt: string) => (
-    <text key={txt} x={x} y={y} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">
-      {txt}
-    </text>
-  );
+  const CY = 120; // center arrow y
 
   return (
-    <svg viewBox="0 0 880 210" className="w-full" style={{ maxHeight: 210 }}>
-      {/* Input */}
-      <rect x={10} y={75} width={110} height={60} rx={6} fill="#0a0f1a" stroke="#334155" strokeWidth={1} strokeDasharray="4 2" />
-      <text x={65} y={99} fontSize={10} textAnchor="middle" fill="#64748b" fontFamily="monospace">INPUT</text>
-      <text x={65} y={113} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">Pathogenic</text>
-      <text x={65} y={124} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">missense variant</text>
+    <svg viewBox="0 0 900 255" className="w-full" style={{ maxHeight: 255 }}>
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#475569" />
+        </marker>
+      </defs>
 
-      {arrow(120, 105, 148, 105)}
-      {label(134, 100, "")}
+      {/* ── Input ── */}
+      <rect x={8} y={88} width={108} height={64} rx={6}
+            fill="#0a0f1a" stroke="#334155" strokeWidth={1} strokeDasharray="4 2" />
+      <text x={62} y={110} fontSize={9} textAnchor="middle" fill="#64748b" fontFamily="monospace" fontWeight="bold">INPUT</text>
+      <text x={62} y={125} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">Pathogenic</text>
+      <text x={62} y={138} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">missense variant</text>
 
-      {/* Stage 1 */}
-      {box(150, 55, 170, 100, "Stage 1", "GNN-LM Classifier", "cyan", "RESCUE FILTER")}
-      <text x={235} y={130} fontSize={8} textAnchor="middle" fill="#0ea5e9" fontFamily="monospace">Rescue score ≥ 0.70</text>
+      {/* Input → Stage 1 */}
+      <line x1={116} y1={CY} x2={148} y2={CY} stroke="#475569" strokeWidth={1.5} markerEnd="url(#arr)" />
 
-      {arrow(320, 105, 348, 105)}
-      {label(334, 98, "amenable")}
+      {/* ── Stage 1 ── */}
+      <rect x={150} y={42} width={162} height={138} rx={8}
+            fill="#0c1f2e" stroke="#0ea5e9" strokeWidth={1.5} />
+      <text x={162} y={58} fontSize={8} fontFamily="monospace" fill="#0ea5e9" fontWeight="bold">RESCUE FILTER</text>
+      <text x={231} y={98} fontSize={13} fontWeight="bold" textAnchor="middle" fill="white" fontFamily="system-ui">Stage 1</text>
+      <text x={231} y={115} fontSize={10} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">GNN-LM Classifier</text>
+      <text x={231} y={132} fontSize={8} textAnchor="middle" fill="#0ea5e9" fontFamily="monospace">Rescue score ≥ 0.70</text>
+      <text x={231} y={148} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">Multi-modal GNN × Transformer</text>
+      <text x={231} y={160} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">sequence + structure fusion</text>
 
-      {/* Stage 2 */}
-      {box(350, 45, 200, 120, "Stage 2", "ANM + fpocket", "violet", "POCKET DETECTION")}
-      <text x={450} y={138} fontSize={8} textAnchor="middle" fill="#8b5cf6" fontFamily="monospace">20 conformations · E_ij matrix</text>
-      <text x={450} y={148} fontSize={8} textAnchor="middle" fill="#8b5cf6" fontFamily="monospace">drug. threshold &gt; 0.70</text>
+      {/* Stage 1 → Stage 2 */}
+      <line x1={312} y1={CY} x2={346} y2={CY} stroke="#475569" strokeWidth={1.5} markerEnd="url(#arr)" />
+      <text x={329} y={115} fontSize={8} textAnchor="middle" fill="#64748b" fontFamily="monospace">amenable</text>
 
-      {arrow(550, 105, 578, 105)}
-      {label(564, 98, "cryptic pocket")}
+      {/* ── Stage 2 ── */}
+      <rect x={348} y={28} width={200} height={166} rx={8}
+            fill="#140e24" stroke="#8b5cf6" strokeWidth={1.5} />
+      <text x={360} y={44} fontSize={8} fontFamily="monospace" fill="#8b5cf6" fontWeight="bold">POCKET DETECTION</text>
+      <text x={448} y={88} fontSize={13} fontWeight="bold" textAnchor="middle" fill="white" fontFamily="system-ui">Stage 2</text>
+      <text x={448} y={105} fontSize={10} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">ANM + fpocket</text>
+      <text x={448} y={122} fontSize={8} textAnchor="middle" fill="#8b5cf6" fontFamily="monospace">20 conformations · 1.5 Å RMSD</text>
+      <text x={448} y={136} fontSize={8} textAnchor="middle" fill="#8b5cf6" fontFamily="monospace">drug. threshold &gt; 0.70</text>
+      <text x={448} y={153} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">Anisotropic Network Model ·</text>
+      <text x={448} y={165} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">Voronoi alpha-sphere clustering</text>
 
-      {/* Stage 3 */}
-      {box(580, 55, 190, 100, "Stage 3", "SMILES Evolution", "green", "CHAPERONE DESIGN")}
-      <text x={675} y={130} fontSize={8} textAnchor="middle" fill="#22c55e" fontFamily="monospace">MW &lt;350 Da · SA &lt;3.5 · QED &gt;0.7</text>
+      {/* Stage 2 → Stage 3 */}
+      <line x1={548} y1={CY} x2={582} y2={CY} stroke="#475569" strokeWidth={1.5} markerEnd="url(#arr)" />
+      <text x={565} y={115} fontSize={8} textAnchor="middle" fill="#64748b" fontFamily="monospace">cryptic pocket</text>
 
-      {arrow(770, 105, 798, 105)}
+      {/* ── Stage 3 ── */}
+      <rect x={584} y={42} width={178} height={138} rx={8}
+            fill="#0e1a0e" stroke="#22c55e" strokeWidth={1.5} />
+      <text x={596} y={58} fontSize={8} fontFamily="monospace" fill="#22c55e" fontWeight="bold">CHAPERONE DESIGN</text>
+      <text x={673} y={98} fontSize={13} fontWeight="bold" textAnchor="middle" fill="white" fontFamily="system-ui">Stage 3</text>
+      <text x={673} y={115} fontSize={10} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">SMILES Evolution</text>
+      <text x={673} y={132} fontSize={8} textAnchor="middle" fill="#22c55e" fontFamily="monospace">MW &lt;350 Da · SA &lt;3.5 · QED &gt;0.7</text>
+      <text x={673} y={148} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">Evolutionary search ·</text>
+      <text x={673} y={160} fontSize={8} textAnchor="middle" fill="#475569" fontFamily="monospace">RDKit pharmacophore scoring</text>
 
-      {/* Output */}
-      <rect x={800} y={75} width={72} height={60} rx={6} fill="#0a1a0e" stroke="#22c55e" strokeWidth={1.5} />
-      <text x={836} y={99} fontSize={9} textAnchor="middle" fill="#22c55e" fontFamily="monospace">OUTPUT</text>
-      <text x={836} y={113} fontSize={8} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">Chaperone</text>
-      <text x={836} y={124} fontSize={8} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">+ PDB atlas</text>
+      {/* Stage 3 → Output */}
+      <line x1={762} y1={CY} x2={796} y2={CY} stroke="#475569" strokeWidth={1.5} markerEnd="url(#arr)" />
 
-      {/* Stage labels at bottom */}
-      <text x={235} y={200} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">Multi-modal GNN ×</text>
-      <text x={235} y={210} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">Transformer fusion</text>
-      <text x={450} y={200} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">Anisotropic Network Model ·</text>
-      <text x={450} y={210} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">Voronoi alpha-sphere clustering</text>
-      <text x={675} y={200} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">Evolutionary SMILES search ·</text>
-      <text x={675} y={210} fontSize={9} textAnchor="middle" fill="#475569" fontFamily="monospace">RDKit pharmacophore scoring</text>
+      {/* ── Output ── */}
+      <rect x={798} y={88} width={94} height={64} rx={6}
+            fill="#0a1a0e" stroke="#22c55e" strokeWidth={1.5} />
+      <text x={845} y={110} fontSize={9} textAnchor="middle" fill="#22c55e" fontFamily="monospace" fontWeight="bold">OUTPUT</text>
+      <text x={845} y={125} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">Chaperone</text>
+      <text x={845} y={138} fontSize={9} textAnchor="middle" fill="#94a3b8" fontFamily="system-ui">+ PDB atlas</text>
     </svg>
   );
 }
