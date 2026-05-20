@@ -103,8 +103,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const meta     = entry.metadata  ?? {};
 
   const pocketLabelList: string[] = (seq.pocket_lining_residues ?? "").split("-").filter(Boolean);
-  const pdbUrl = assets.pdb_structure ?? "";
-  const bindingModes = Object.entries((chap.binding_mode ?? {}) as Record<string, string>);
+  const pdbUrl = entry.pdb_structure ?? assets.pdb_structure ?? "";
+  // binding_mode is { type: "salt_bridge", residues: ["K289",...] }
+  const bindingModeType: string = chap.binding_mode?.type ?? "van_der_waals";
+  const bindingModeResidues: string[] = Array.isArray(chap.binding_mode?.residues) ? chap.binding_mode.residues : [];
 
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -265,8 +267,8 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               <div className="data-label mb-2">Drug-likeness</div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label: "Lipinski Ro5", pass: chap.lipinski ?? ((chap.mw ?? 0) <= 500 && (chap.hbd ?? 0) <= 5 && (chap.hba ?? 0) <= 10 && (chap.logp ?? 0) <= 5) },
-                  { label: "Veber Oral", pass: chap.veber ?? ((chap.rotatable_bonds ?? 0) <= 10 && (chap.tpsa ?? 0) <= 140) },
+                  { label: "Lipinski Ro5", pass: typeof chap.lipinski === "object" ? chap.lipinski?.passes : (chap.lipinski ?? ((chap.mw ?? 0) <= 500 && (chap.hbd ?? 0) <= 5 && (chap.hba ?? 0) <= 10 && (chap.logp ?? 0) <= 5)) },
+                  { label: "Veber Oral", pass: typeof chap.veber === "object" ? chap.veber?.passes : (chap.veber ?? ((chap.rotatable_bonds ?? 0) <= 10 && (chap.tpsa ?? 0) <= 140)) },
                   { label: "PAINS-free", pass: chap.pains != null ? !chap.pains : true },
                 ].map(r => (
                   <div key={r.label} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-xs font-semibold"
@@ -284,19 +286,21 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             <div>
               <div className="data-label mb-2">Predicted Binding Mode</div>
               <div className="space-y-1.5">
-                {bindingModes.map(([k, v]) => (
-                  <div key={k} className="flex gap-2.5 rounded-lg border border-[var(--border)] p-2.5"
-                       style={{ background: "var(--bg-1)" }}>
-                    <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "var(--violet)" }} />
-                    <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
-                           style={{ color: "var(--violet)" }}>
-                        {k.replace(/_/g, " ")}
-                      </div>
-                      <div className="text-xs leading-5" style={{ color: "var(--text-secondary)" }}>{v}</div>
+                <div className="flex gap-2.5 rounded-lg border border-[var(--border)] p-2.5"
+                     style={{ background: "var(--bg-1)" }}>
+                  <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "var(--violet)" }} />
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
+                         style={{ color: "var(--violet)" }}>
+                      {bindingModeType.replace(/_/g, " ")}
+                    </div>
+                    <div className="text-xs leading-5 flex flex-wrap gap-1 mt-1" style={{ color: "var(--text-secondary)" }}>
+                      {bindingModeResidues.map(r => (
+                        <span key={r} className="tag tag-violet text-[10px]">{r}</span>
+                      ))}
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
