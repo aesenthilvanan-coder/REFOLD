@@ -104,9 +104,14 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
 
   const pocketLabelList: string[] = (seq.pocket_lining_residues ?? "").split("-").filter(Boolean);
   const pdbUrl = entry.pdb_structure ?? assets.pdb_structure ?? "";
-  // binding_mode is { type: "salt_bridge", residues: ["K289",...] }
-  const bindingModeType: string = chap.binding_mode?.type ?? "van_der_waals";
-  const bindingModeResidues: string[] = Array.isArray(chap.binding_mode?.residues) ? chap.binding_mode.residues : [];
+  // binding_mode: two possible formats from pipeline
+  //   new entries:  { salt_bridge: "description...", ... }  (key=type, value=description)
+  //   backfilled:   { type: "salt_bridge", residues: [...] }
+  const bindingModeRaw = chap.binding_mode ?? {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bindingModeEntries: [string, any][] = "type" in bindingModeRaw
+    ? [[bindingModeRaw.type ?? "interaction", Array.isArray(bindingModeRaw.residues) ? bindingModeRaw.residues.join(", ") : ""]]
+    : Object.entries(bindingModeRaw);
 
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -286,21 +291,21 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             <div>
               <div className="data-label mb-2">Predicted Binding Mode</div>
               <div className="space-y-1.5">
-                <div className="flex gap-2.5 rounded-lg border border-[var(--border)] p-2.5"
-                     style={{ background: "var(--bg-1)" }}>
-                  <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "var(--violet)" }} />
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
-                         style={{ color: "var(--violet)" }}>
-                      {bindingModeType.replace(/_/g, " ")}
-                    </div>
-                    <div className="text-xs leading-5 flex flex-wrap gap-1 mt-1" style={{ color: "var(--text-secondary)" }}>
-                      {bindingModeResidues.map(r => (
-                        <span key={r} className="tag tag-violet text-[10px]">{r}</span>
-                      ))}
+                {bindingModeEntries.map(([k, v]) => (
+                  <div key={k} className="flex gap-2.5 rounded-lg border border-[var(--border)] p-2.5"
+                       style={{ background: "var(--bg-1)" }}>
+                    <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "var(--violet)" }} />
+                    <div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
+                           style={{ color: "var(--violet)" }}>
+                        {String(k).replace(/_/g, " ")}
+                      </div>
+                      <div className="text-xs leading-5" style={{ color: "var(--text-secondary)" }}>
+                        {Array.isArray(v) ? v.join(", ") : String(v)}
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
