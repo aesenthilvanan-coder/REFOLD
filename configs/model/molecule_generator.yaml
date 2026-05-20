@@ -1,0 +1,37 @@
+name: molecule_generator
+
+architecture:
+  hidden_dim: 256
+  n_layers: 6
+  n_heads: 8
+  pocket_embed_dim: 128
+  pocket_node_feat_dim: 25
+  pocket_scalar_dim: 8
+  mol_atom_types: 9
+  n_bond_types: 4
+  n_atoms_min: 10
+  n_atoms_max: 35
+
+diffusion:
+  T_default: 1000
+  T_m1: 500
+  beta_start: 1.0e-4
+  beta_end: 0.02
+  schedule: linear
+
+training:
+  lr: 1e-4
+  weight_decay: 1e-4
+  batch_size: 64
+  n_epochs: 200
+  grad_clip: 1.0
+  grad_accumulation_steps: 8
+  ema_decay: 0.9999
+  scheduler: cosine_annealing
+  T_max: 100000
+  mps_memory_cleanup_interval: 200
+
+generation:
+  n_molecules_per_pocket: 1000
+  temperature: 1.0
+  top_k: 3

@@ -1,0 +1,68 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv/
+venv/
+env/
+
+# Data (large files)
+data/raw/*.xml
+data/raw/*.fasta
+data/raw/*.json
+data/raw/*.tsv
+data/raw/*.gz
+data/processed/**/*.pt
+data/results/
+
+# Model checkpoints
+checkpoints/
+
+# Logs
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# macOS
+.DS_Store
+
+# fpocket output
+*.pdb_out/
+*_out/
+
+# Separate git repos (tracked independently)
+pcd-atlas-data/
+
+# Website build artifacts and secrets
+pcd-website/.next/
+pcd-website/node_modules/
+pcd-website/.env.local
+pcd-website/.env.*.local
+
+# Extracted spec-doc images (junk from early extraction)
+pcd-website/public/images/inline_img_*.jpg
+
+# Pipeline state (ephemeral, regenerated on restart)
+data/pipeline_state.json
+data/pipeline_state.tmp
+data/no_alphafold.txt
+
+# Large ClinVar source file (processed queue is tracked instead)
+data/clinvar_variant_summary.txt.gz
+data/clinvar_pathogenic_missense.tsv
+
+# AlphaFold structure cache (downloaded on demand)
+data/raw/alphafold/

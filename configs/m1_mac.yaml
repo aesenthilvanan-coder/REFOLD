@@ -1,0 +1,42 @@
+# M1/M2/M3 Mac overrides — reduced memory footprint
+
+project:
+  name: REFOLD
+  version: "1.0.0"
+
+device:
+  type: "mps"
+
+pipeline:
+  n_conformations: 10
+  n_molecules_per_pocket: 200
+  n_diffusion_steps: 500
+  n_atoms_range: [10, 25]
+
+models:
+  rescue_classifier:
+    esm2_dim: 480
+    hidden_dims: [256, 128, 64, 32]
+    dropout: 0.20
+  molecule_generator:
+    hidden_dim: 128
+    n_layers: 4
+    n_heads: 4
+    pocket_embed_dim: 64
+    T: 500
+
+training:
+  rescue_classifier:
+    batch_size: 4
+    gradient_accumulation: 8
+    learning_rate: 3.0e-4
+    weight_decay: 0.01
+  molecule_generator:
+    batch_size: 2
+    gradient_accumulation: 16
+    learning_rate: 1.0e-4
+    n_steps: 50000
+
+logging:
+  level: "INFO"
+  log_dir: "logs"

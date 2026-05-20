@@ -1,0 +1,6 @@
+-r requirements.txt
+torch>=2.1
+torch-geometric>=2.4
+transformers>=4.35
+fair-esm>=2.0
+accelerate>=0.24

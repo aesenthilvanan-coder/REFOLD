@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.syalis.refold.pcd</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/Caskroom/miniforge/base/bin/python3</string>
+    <string>/Users/TheAES/Desktop/REFOLD/scripts/pipeline_daemon.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/TheAES/Desktop/REFOLD</string>
+
+  <!-- Restart immediately on crash -->
+  <key>KeepAlive</key>
+  <true/>
+
+  <!-- Start on login -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- Stdout/stderr to log files -->
+  <key>StandardOutPath</key>
+  <string>/Users/TheAES/Desktop/REFOLD/logs/daemon_stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/TheAES/Desktop/REFOLD/logs/daemon_stderr.log</string>
+
+  <!-- Throttle restarts: wait 30s before restarting after crash -->
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+
+  <!-- Low priority so it doesn't interfere with interactive work -->
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>Nice</key>
+  <integer>10</integer>
+</dict>
+</plist>

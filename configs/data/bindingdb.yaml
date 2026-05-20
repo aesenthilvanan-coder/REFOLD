@@ -1,0 +1,14 @@
+name: bindingdb
+
+source:
+  url: "https://www.bindingdb.org/bind/downloads/BindingDB_All_2024m1.tsv.zip"
+
+storage:
+  raw_dir: data/raw/bindingdb
+  processed_path: data/processed/bindingdb_binding.parquet
+
+filters:
+  activity_types: [Ki, IC50, Kd, EC50]
+  max_affinity_nm: 100000
+  require_smiles: true
+  require_uniprot: true

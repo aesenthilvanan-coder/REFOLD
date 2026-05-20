@@ -1,0 +1,23 @@
+# Normalize line endings
+* text=auto
+
+# Force LF for scripts
+*.sh text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.md text eol=lf
+
+# Binary files
+*.pdb binary
+*.pt binary
+*.pkl binary
+*.parquet binary
+*.gz binary
+*.zip binary
+*.tar binary
+*.png binary
+*.jpg binary
+*.pdf binary

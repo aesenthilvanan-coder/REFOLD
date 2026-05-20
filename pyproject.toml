@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "refold"
+version = "1.0.0"
+description = "Restorative Engine for Folding Optimization via Ligand Design"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "REFOLD Team" }]
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "biopython>=1.81",
+    "gemmi>=0.6",
+    "requests>=2.31",
+    "loguru>=0.7",
+    "tqdm>=4.65",
+    "pyyaml>=6.0",
+    "click>=8.1",
+    "pyarrow>=12.0",
+    "lxml>=4.9",
+    "rdkit>=2023.3",
+    "networkx>=3.1",
+]
+
+[project.optional-dependencies]
+ml = [
+    "torch>=2.1",
+    "torch-geometric>=2.4",
+    "transformers>=4.35",
+    "fair-esm>=2.0",
+    "accelerate>=0.24",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "black>=23.9",
+    "isort>=5.12",
+    "flake8>=6.1",
+    "mypy>=1.6",
+]
+
+[project.scripts]
+refold-single = "refold.pipeline.single_mutation:main"
+refold-scan = "refold.pipeline.batch_clinvar:main"
+refold-proteome = "refold.pipeline.proteome_scan:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

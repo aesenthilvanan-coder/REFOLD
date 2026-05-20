@@ -1,0 +1,17 @@
+name: chembl
+
+source:
+  url: "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_34_sqlite.tar.gz"
+  version: "34"
+
+storage:
+  raw_dir: data/raw/chembl
+  processed_path: data/processed/chembl_binding.parquet
+
+filters:
+  min_confidence_score: 5
+  target_type: SINGLE PROTEIN
+  activity_types: [IC50, Ki, Kd, EC50]
+  max_mw: 900
+  require_smiles: true
+  require_uniprot: true

@@ -1,0 +1,20 @@
+# GPU server configuration (A100/H100)
+
+device:
+  type: "cuda"
+
+pipeline:
+  n_conformations: 50
+  n_molecules_per_pocket: 1000
+  n_diffusion_steps: 1000
+
+training:
+  rescue_classifier:
+    batch_size: 32
+    gradient_accumulation: 1
+    learning_rate: 3.0e-4
+  molecule_generator:
+    batch_size: 16
+    gradient_accumulation: 1
+    learning_rate: 1.0e-4
+    n_steps: 200000

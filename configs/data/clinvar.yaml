@@ -1,0 +1,29 @@
+name: clinvar
+
+source:
+  vcf_url: "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar.vcf.gz"
+  xml_url: "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarFullRelease_00-latest.xml.gz"
+  assembly: GRCh38
+
+filters:
+  pathogenic_significances:
+    - Pathogenic
+    - Likely pathogenic
+    - Pathogenic/Likely pathogenic
+    - Pathogenic, low penetrance
+    - Likely pathogenic, low penetrance
+  exclude_stop_codons: true
+  exclude_synonymous: true
+  require_uniprot: true
+  require_alphafold: true
+
+output:
+  raw_parquet: data/processed/clinvar_mutations.parquet
+  filtered_parquet: data/processed/clinvar_missense_filtered.parquet
+
+splits:
+  train: 0.70
+  val: 0.10
+  test: 0.10
+  benchmark: 0.10
+  clustering_identity: 0.30

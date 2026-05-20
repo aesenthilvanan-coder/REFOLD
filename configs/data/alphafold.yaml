@@ -1,0 +1,22 @@
+name: alphafold
+
+source:
+  base_url: "https://alphafold.ebi.ac.uk/files/"
+  model_version: v4
+  file_pattern: "AF-{uniprot_id}-F1-model_v4.pdb"
+
+storage:
+  raw_dir: data/raw/alphafold
+  cache_hits: true
+
+fetching:
+  rate_limit_per_second: 5.0
+  max_workers: 4
+  timeout_seconds: 30
+  retry_attempts: 3
+  retry_backoff: 2.0
+
+quality_filters:
+  min_plddt: 40.0
+  min_resolved_fraction: 0.5
+  require_ca: true
