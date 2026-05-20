@@ -3,6 +3,7 @@ import Image from "next/image";
 import { PCDAtlas } from "./types";
 import { fetchAtlas } from "./lib/atlas";
 import { GnnDiagram } from "./components/GnnDiagram";
+import { LiveStats } from "./components/LiveStats";
 
 export const dynamic = "force-dynamic";
 
@@ -38,41 +39,11 @@ function NavBar() {
   );
 }
 
-// ── Proteome progress bar ────────────────────────────────────────────────────
-function ProteomeProgress({ data }: { data: PCDAtlas }) {
-  const targets = data.proteome_targets;
-  if (!targets) return null;
-  const total = targets.total_clinvar_pathogenic_missense;
-  // Use actual DB entries count so this matches the "Entries" stat
-  const done = data.total_entries;
-  const pct = ((done / total) * 100).toFixed(4);
-
-  return (
-    <div className="border border-[var(--border)] rounded-lg px-5 py-3 flex items-center gap-4"
-         style={{ background: "var(--bg-2)" }}>
-      <div className="flex-1">
-        <div className="flex justify-between items-baseline mb-1.5">
-          <span className="section-label">Proteome Coverage</span>
-          <span className="text-xs font-mono" style={{ color: "var(--text-secondary)" }}>
-            {done.toLocaleString()} / {total.toLocaleString()} variants ({pct}%)
-          </span>
-        </div>
-        <div className="score-bar-track">
-          <div className="score-bar-fill" style={{ width: `${Math.max(parseFloat(pct), 0.5)}%` }} />
-        </div>
-      </div>
-      <div className="flex items-center gap-1.5 shrink-0">
-        <div className="w-1.5 h-1.5 rounded-full bg-[var(--green)] pulse-dot" />
-        <span className="text-[10px] font-mono" style={{ color: "var(--green)" }}>LIVE</span>
-      </div>
-    </div>
-  );
-}
-
 // ── Hero ─────────────────────────────────────────────────────────────────────
 function HeroSection({ data }: { data: PCDAtlas }) {
-  const avgDrug = (data.entries.reduce((s, e) => s + (e.pocket?.fpocket_druggability ?? 0), 0) / data.entries.length).toFixed(3);
+  const avgDrug = data.entries.reduce((s, e) => s + (e.pocket?.fpocket_druggability ?? 0), 0) / data.entries.length;
   const diseases = new Set(data.entries.map(e => e.metadata.disease)).size;
+  const total = data.proteome_targets?.total_clinvar_pathogenic_missense ?? 178597;
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center pt-14 overflow-hidden">
@@ -98,20 +69,12 @@ function HeroSection({ data }: { data: PCDAtlas }) {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { v: data.total_entries, l: "Entries" },
-                { v: avgDrug, l: "Avg Drug Score" },
-                { v: diseases, l: "Diseases" },
-              ].map(s => (
-                <div key={s.l} className="card p-4 text-center">
-                  <div className="text-2xl font-black font-mono" style={{ color: "var(--accent)" }}>{s.v}</div>
-                  <div className="data-label mt-1">{s.l}</div>
-                </div>
-              ))}
-            </div>
-
-            <ProteomeProgress data={data} />
+            <LiveStats
+              initialEntries={data.total_entries}
+              initialAvgDrug={avgDrug}
+              initialDiseases={diseases}
+              initialTotal={total}
+            />
 
             <div className="flex gap-3">
               <Link href="/database"
