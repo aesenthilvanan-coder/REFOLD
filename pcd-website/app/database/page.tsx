@@ -118,12 +118,16 @@ export default function DatabasePage() {
           </Link>
           <span style={{ color: "var(--text-muted)" }}>/</span>
           <span className="font-semibold" style={{ color: "var(--text-primary)" }}>Database</span>
-          {atlas && (
-            <div className="ml-auto flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--green)] pulse-dot" />
-              <span className="text-[10px] font-mono" style={{ color: "var(--green)" }}>LIVE</span>
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-4">
+            <Link href="/abstract" className="text-xs transition-colors"
+                  style={{ color: "var(--text-muted)" }}>Abstract</Link>
+            {atlas && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--green)] pulse-dot" />
+                <span className="text-[10px] font-mono" style={{ color: "var(--green)" }}>LIVE</span>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

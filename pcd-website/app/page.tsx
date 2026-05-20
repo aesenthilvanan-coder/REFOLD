@@ -28,6 +28,10 @@ function NavBar() {
               {s}
             </a>
           ))}
+          <Link href="/abstract"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs tracking-wide">
+            Abstract
+          </Link>
           <Link href="/database"
             className="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors"
             style={{ borderColor: "var(--accent-border)", color: "var(--accent)", background: "var(--accent-dim)" }}>
