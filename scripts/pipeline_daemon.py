@@ -404,9 +404,10 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
     }
 
     return {
-        "entry_id":    entry_id,
-        "investigator": "Aaryan Senthilvanan",
-        "institution": "S.Y.A.L.I.S Labs",
+        "entry_id":      entry_id,
+        "pdb_structure": pdb_public,
+        "investigator":  "Aaryan Senthilvanan",
+        "institution":   "S.Y.A.L.I.S Labs",
         "metadata": {
             "gene":               variant["gene"],
             "uniprot":            variant["uniprot"],
