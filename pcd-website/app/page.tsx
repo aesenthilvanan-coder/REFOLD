@@ -4,6 +4,8 @@ import { PCDAtlas } from "./types";
 import { fetchAtlas } from "./lib/atlas";
 import { GnnDiagram } from "./components/GnnDiagram";
 
+export const dynamic = "force-dynamic";
+
 // ── Nav ─────────────────────────────────────────────────────────────────────
 function NavBar() {
   return (
@@ -40,7 +42,9 @@ function NavBar() {
 function ProteomeProgress({ data }: { data: PCDAtlas }) {
   const targets = data.proteome_targets;
   if (!targets) return null;
-  const { total_clinvar_pathogenic_missense: total, total_processed: done } = targets;
+  const total = targets.total_clinvar_pathogenic_missense;
+  // Use actual DB entries count so this matches the "Entries" stat
+  const done = data.total_entries;
   const pct = ((done / total) * 100).toFixed(4);
 
   return (
@@ -67,7 +71,7 @@ function ProteomeProgress({ data }: { data: PCDAtlas }) {
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
 function HeroSection({ data }: { data: PCDAtlas }) {
-  const avgDrug = (data.entries.reduce((s, e) => s + e.pocket.fpocket_druggability, 0) / data.entries.length).toFixed(3);
+  const avgDrug = (data.entries.reduce((s, e) => s + (e.pocket?.fpocket_druggability ?? 0), 0) / data.entries.length).toFixed(3);
   const diseases = new Set(data.entries.map(e => e.metadata.disease)).size;
 
   return (

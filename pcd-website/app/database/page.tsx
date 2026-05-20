@@ -176,11 +176,11 @@ export default function DatabasePage() {
                   <div className="flex justify-between items-baseline mb-1.5">
                     <span className="section-label">Proteome Coverage</span>
                     <span className="text-xs font-mono" style={{ color: "var(--text-secondary)" }}>
-                      {atlas.proteome_targets.total_processed.toLocaleString()} / {atlas.proteome_targets.total_clinvar_pathogenic_missense.toLocaleString()} variants
+                      {atlas.total_entries.toLocaleString()} / {atlas.proteome_targets.total_clinvar_pathogenic_missense.toLocaleString()} variants
                     </span>
                   </div>
                   <div className="score-bar-track">
-                    <div className="score-bar-fill" style={{ width: `${Math.max((atlas.proteome_targets.total_processed / atlas.proteome_targets.total_clinvar_pathogenic_missense) * 100, 0.5)}%` }} />
+                    <div className="score-bar-fill" style={{ width: `${Math.max((atlas.total_entries / atlas.proteome_targets.total_clinvar_pathogenic_missense) * 100, 0.5)}%` }} />
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
