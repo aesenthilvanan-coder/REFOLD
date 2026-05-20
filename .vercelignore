@@ -1,0 +1,19 @@
+# Only pcd-website/ is needed for deployment
+scripts/
+src/
+tests/
+configs/
+docker/
+data/
+logs/
+checkpoints/
+*.py
+*.sh
+*.md
+!README.md
+pyproject.toml
+setup.cfg
+requirements*.txt
+com.syalis.refold.pcd.plist
+DAEMON_SETUP.md
+pcd-atlas-data/
