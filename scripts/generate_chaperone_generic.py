@@ -342,8 +342,8 @@ def main():
     seed_int   = int(hashlib.md5(seed_bytes).hexdigest()[:8], 16) % (2**31)
     rng        = np.random.default_rng(seed_int)
 
-    # Run evolutionary optimization
-    final = evolve(pocket, n_gen=40, pop_size=40, elite_k=10, rng=rng)
+    # Run evolutionary optimization (20 gen × 40 pop keeps Stage 3 under ~3 min)
+    final = evolve(pocket, n_gen=20, pop_size=40, elite_k=10, rng=rng)
 
     if not final:
         log.error("No valid candidates generated.")
