@@ -22,6 +22,11 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
   useEffect(() => {
     let cancelled = false;
 
+    // Block ALL zoom inputs — wheel, trackpad pinch, middle-button drag.
+    // Rotation (left-drag) still works normally.
+    const blockZoom = (e: WheelEvent) => e.preventDefault();
+    const blockMiddle = (e: MouseEvent) => { if (e.button === 1) e.preventDefault(); };
+
     async function init() {
       // Load 3Dmol.js from CDN if not already present
       if (!window.$3Dmol) {
@@ -39,8 +44,13 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
       const viewer = window.$3Dmol.createViewer(containerRef.current, {
         backgroundColor: "#07090f",
         antialias: true,
+        disableScroll: true,
       });
       viewerRef.current = viewer;
+
+      const el = containerRef.current;
+      el.addEventListener("wheel", blockZoom, { passive: false });
+      el.addEventListener("mousedown", blockMiddle);
 
       try {
         const res = await fetch(pdbUrl);
@@ -94,7 +104,14 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
     }
 
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      const el = containerRef.current;
+      if (el) {
+        el.removeEventListener("wheel", blockZoom);
+        el.removeEventListener("mousedown", blockMiddle);
+      }
+    };
   }, [pdbUrl, pocketResidues]);
 
   return (
@@ -139,6 +156,7 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
             <div className="w-3 h-1 rounded-sm bg-[var(--accent)]" />
             <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Pocket</span>
           </div>
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>drag to rotate</span>
         </div>
       )}
     </div>
