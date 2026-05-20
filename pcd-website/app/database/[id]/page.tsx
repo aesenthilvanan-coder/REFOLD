@@ -161,87 +161,94 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* ── 3D Viewer ──────────────────────────────────────────────── */}
-        {pdbUrl && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="section-label">3D Structure</div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  Transient conformation · pocket-lining residues in cyan
-                </span>
+        {/* ── Pocket stats + 3D viewer side by side ──────────────────── */}
+        <div className="card rounded-xl p-5">
+          <div className="grid lg:grid-cols-[1fr_340px] gap-6">
+
+            {/* Left: pocket stats */}
+            <div className="space-y-4">
+              <div>
+                <span className="tag tag-cyan">Stage 2 — Transient Pocket</span>
+                <h2 className="mt-3 font-bold" style={{ color: "var(--text-primary)" }}>Cryptic Binding Site</h2>
               </div>
-            </div>
-            <MolViewer
-              pdbUrl={pdbUrl}
-              pocketResidues={pocketLabelList}
-              height={460}
-            />
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {pocket.target_conformation ?? "ANM-sampled transient conformation"}
-            </p>
-          </div>
-        )}
 
-        {/* ── Pocket + Chaperone side by side ────────────────────────── */}
-        <div className="grid lg:grid-cols-2 gap-5">
-
-          {/* Pocket panel */}
-          <div className="card rounded-xl p-5 space-y-5">
-            <div>
-              <span className="tag tag-cyan">Stage 2 — Transient Pocket</span>
-              <h2 className="mt-3 font-bold" style={{ color: "var(--text-primary)" }}>Cryptic Binding Site</h2>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { l: "fpocket Drug.", v: (pocket.fpocket_druggability ?? 0).toFixed(3), c: "var(--accent)" },
-                { l: "WT Baseline", v: (pocket.wt_baseline_druggability ?? 0).toFixed(3), c: "var(--red)" },
-                { l: "Volume (Å³)", v: (pocket.volume_angstrom3 ?? 0).toFixed(1), c: "var(--text-secondary)" },
-                { l: "α-Spheres", v: String(pocket.alpha_sphere_count ?? "—"), c: "var(--text-secondary)" },
-                { l: "Conformations", v: String(pocket.n_conformations_sampled ?? 20), c: "var(--text-secondary)" },
-                { l: "Mut→Pocket Dist.", v: pocket.dist_mutation_to_pocket_angstrom != null ? `${(pocket.dist_mutation_to_pocket_angstrom).toFixed(1)} Å` : "—", c: "var(--amber)" },
-              ].map(p => (
-                <div key={p.l} className="rounded-lg border border-[var(--border)] p-3"
-                     style={{ background: "var(--bg-1)" }}>
-                  <div className="text-sm font-bold font-mono" style={{ color: p.c }}>{p.v}</div>
-                  <div className="data-label mt-0.5">{p.l}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
-              <div className="data-label mb-1">Pocket Center (Å)</div>
-              <div className="font-mono text-sm" style={{ color: "var(--accent)" }}>
-                ({(pocket.center_angstrom ?? [0, 0, 0]).map((v: number) => v.toFixed(2)).join(", ")})
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
-              <div className="data-label mb-1">Pocket Type</div>
-              <div className="text-xs" style={{ color: "var(--text-secondary)" }}>{pocket.pocket_type ?? (pocket.cryptic ? "Cryptic" : "Allosteric")}</div>
-            </div>
-
-            <div>
-              <div className="data-label mb-2">Pocket-Lining Residues</div>
-              <div className="flex flex-wrap gap-1.5">
-                {pocketLabelList.map(r => (
-                  <span key={r} className="tag tag-violet text-[10px]">{r}</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { l: "fpocket Drug.", v: (pocket.fpocket_druggability ?? 0).toFixed(3), c: "var(--accent)" },
+                  { l: "WT Baseline", v: (pocket.wt_baseline_druggability ?? 0).toFixed(3), c: "var(--red)" },
+                  { l: "Volume (Å³)", v: (pocket.volume_angstrom3 ?? 0).toFixed(1), c: "var(--text-secondary)" },
+                  { l: "α-Spheres", v: String(pocket.alpha_sphere_count ?? "—"), c: "var(--text-secondary)" },
+                  { l: "Conformations", v: String(pocket.n_conformations_sampled ?? 20), c: "var(--text-secondary)" },
+                  { l: "Mut→Pocket Dist.", v: pocket.dist_mutation_to_pocket_angstrom != null ? `${(pocket.dist_mutation_to_pocket_angstrom).toFixed(1)} Å` : "—", c: "var(--amber)" },
+                ].map(p => (
+                  <div key={p.l} className="rounded-lg border border-[var(--border)] p-3"
+                       style={{ background: "var(--bg-1)" }}>
+                    <div className="text-sm font-bold font-mono" style={{ color: p.c }}>{p.v}</div>
+                    <div className="data-label mt-0.5">{p.l}</div>
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
-              <div className="data-label mb-1">Sequence Slice</div>
-              <div className="font-mono text-[11px] break-all leading-5" style={{ color: "var(--text-secondary)" }}>
-                {seq.sequence_slice_around_pocket ?? "—"}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
+                  <div className="data-label mb-1">Pocket Type</div>
+                  <div className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+                    {pocket.pocket_type ?? (pocket.cryptic ? "Cryptic" : "Allosteric")}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
+                  <div className="data-label mb-1">Pocket Center (Å)</div>
+                  <div className="font-mono text-[11px]" style={{ color: "var(--accent)" }}>
+                    ({(pocket.center_angstrom ?? [0,0,0]).map((v: number) => v.toFixed(1)).join(", ")})
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="data-label mb-2">Pocket-Lining Residues</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {pocketLabelList.map(r => (
+                    <span key={r} className="tag tag-violet text-[10px]">{r}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-[var(--border)] p-3" style={{ background: "var(--bg-1)" }}>
+                <div className="data-label mb-1">Sequence Slice</div>
+                <div className="font-mono text-[11px] break-all leading-5" style={{ color: "var(--text-secondary)" }}>
+                  {seq.sequence_slice_around_pocket ?? "—"}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Chaperone panel */}
-          <div className="card rounded-xl p-5 space-y-5">
+            {/* Right: square 3D viewer */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="section-label">3D Structure</div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>drag to rotate</span>
+              </div>
+              {pdbUrl ? (
+                <MolViewer
+                  pdbUrl={pdbUrl}
+                  pocketResidues={pocketLabelList}
+                  height={340}
+                />
+              ) : (
+                <div className="rounded-xl border border-[var(--border)] flex items-center justify-center"
+                     style={{ height: 340, background: "var(--bg-1)" }}>
+                  <span className="section-label">No structure</span>
+                </div>
+              )}
+              <p className="text-[10px] leading-4" style={{ color: "var(--text-muted)" }}>
+                {pocket.target_conformation ?? "ANM-sampled transient conformation"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Chaperone ──────────────────────────────────────────────── */}
+        <div className="card rounded-xl p-5 space-y-5">
             <div>
               <span className="tag tag-violet">Stage 3 — De Novo Chaperone</span>
               <h2 className="mt-3 font-bold" style={{ color: "var(--text-primary)" }}>{chap.common_name ?? "De Novo Candidate"}</h2>
@@ -308,7 +315,6 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                 ))}
               </div>
             </div>
-          </div>
         </div>
 
         {/* ── E_ij Matrix ─────────────────────────────────────────────── */}
