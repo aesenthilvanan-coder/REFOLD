@@ -1,25 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #07090f;
-  --bg-1: #0d1117;
-  --bg-2: #111827;
-  --bg-3: #1a2234;
-  --border: #1f2d45;
-  --border-light: #243450;
-  --text-primary: #f0f4f8;
-  --text-secondary: #8b9ab0;
-  --text-muted: #4b5a72;
-  --accent: #0ea5e9;
-  --accent-dim: #0ea5e920;
-  --accent-border: #0ea5e940;
-  --green: #10b981;
-  --green-dim: #10b98115;
-  --red: #ef4444;
-  --red-dim: #ef444415;
-  --amber: #f59e0b;
-  --violet: #8b5cf6;
-  --violet-dim: #8b5cf615;
+  /* Backgrounds — white/cool-gray hierarchy */
+  --bg:          #FFFFFF;
+  --bg-1:        #F8FAFC;
+  --bg-2:        #F1F5F9;
+  --bg-3:        #E2E8F0;
+
+  /* Borders */
+  --border:      #E2E8F0;
+  --border-mid:  #CBD5E1;
+
+  /* Text */
+  --text-primary:   #0F172A;
+  --text-secondary: #334155;
+  --text-muted:     #64748B;
+
+  /* Institutional accent — deep navy */
+  --accent:        #1E3A8A;
+  --accent-dim:    #EFF6FF;
+  --accent-border: #BFDBFE;
+  --accent-mid:    #2563EB;
+
+  /* Semantic — muted, functional only */
+  --green:        #15803D;
+  --green-dim:    #F0FDF4;
+  --green-border: #BBF7D0;
+
+  --red:          #B91C1C;
+  --red-dim:      #FEF2F2;
+  --red-border:   #FECACA;
+
+  --amber:        #92400E;
+  --amber-dim:    #FFFBEB;
+  --amber-border: #FDE68A;
+
+  /* Teal — replaces purple; used for pocket/stage-3 contexts */
+  --violet:       #0F766E;
+  --violet-dim:   #F0FDFA;
+  --violet-border:#99F6E4;
 }
 
 @theme inline {
@@ -35,55 +54,79 @@ body {
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-geist-sans), 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* Data cells and labels */
+/* ── Typography helpers ─────────────────────────────────────────────────── */
+
 .data-value {
-  font-family: var(--font-geist-mono), monospace;
+  font-family: var(--font-geist-mono), 'JetBrains Mono', 'Fira Code', monospace;
   color: var(--text-primary);
   font-weight: 600;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 .data-label {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 500;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+}
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
 }
 
-/* Cards */
+/* ── Nav links ──────────────────────────────────────────────────────────── */
+.nav-link {
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+.nav-link:hover {
+  color: var(--text-primary);
+}
+
+/* ── Cards — flat bordered panels, no shadows, no blur ─────────────────── */
+
 .card {
-  background: var(--bg-2);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 3px;
 }
 .card-hover {
-  background: var(--bg-2);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  border-radius: 3px;
+  transition: background 0.1s ease, border-color 0.1s ease;
 }
 .card-hover:hover {
-  border-color: var(--border-light);
-  background: var(--bg-3);
+  background: var(--bg-1);
+  border-color: var(--border-mid);
 }
 
-/* Tags/badges */
+/* ── Tags — compact, institutional, monospace ───────────────────────────── */
+
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  font-family: var(--font-geist-mono), monospace;
 }
 .tag-cyan {
   background: var(--accent-dim);
@@ -93,81 +136,63 @@ body {
 .tag-green {
   background: var(--green-dim);
   color: var(--green);
-  border: 1px solid #10b98130;
+  border: 1px solid var(--green-border);
 }
 .tag-violet {
   background: var(--violet-dim);
   color: var(--violet);
-  border: 1px solid #8b5cf630;
+  border: 1px solid var(--violet-border);
 }
 .tag-amber {
-  background: #f59e0b15;
+  background: var(--amber-dim);
   color: var(--amber);
-  border: 1px solid #f59e0b30;
+  border: 1px solid var(--amber-border);
 }
 .tag-red {
   background: var(--red-dim);
   color: var(--red);
-  border: 1px solid #ef444430;
+  border: 1px solid var(--red-border);
 }
 
-/* Score bars */
+/* ── Score bars ─────────────────────────────────────────────────────────── */
+
 .score-bar-track {
   height: 3px;
-  border-radius: 2px;
+  border-radius: 0;
   background: var(--bg-3);
 }
 .score-bar-fill {
   height: 3px;
-  border-radius: 2px;
+  border-radius: 0;
   background: var(--accent);
   transition: width 0.4s ease;
 }
 
-/* Section labels */
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
+/* ── Misc ───────────────────────────────────────────────────────────────── */
 
-/* Divider */
-.divider {
-  height: 1px;
-  background: var(--border);
-}
-
-/* Accent text - used very sparingly */
+.divider { height: 1px; background: var(--border); }
 .text-accent { color: var(--accent); }
 
-/* Grid background - very subtle */
-.grid-bg {
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: -1px -1px;
-  opacity: 0.3;
-}
-
-/* Molecule 3D viewer container */
+/* 3D viewer — intentionally keeps dark background for molecular rendering */
 .mol-viewer {
-  border-radius: 8px;
+  border-radius: 2px;
   overflow: hidden;
-  background: #000;
+  background: #0d1424;
   position: relative;
 }
 
+/* Zebra table rows */
+.row-even { background: var(--bg); }
+.row-odd  { background: var(--bg-1); }
+
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.fade-up { animation: fade-up 0.5s ease forwards; }
+.fade-up { animation: fade-up 0.25s ease forwards; }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.25; }
 }
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }

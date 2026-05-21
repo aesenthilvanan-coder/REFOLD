@@ -10,32 +10,24 @@ export const dynamic = "force-dynamic";
 // ── Nav ─────────────────────────────────────────────────────────────────────
 function NavBar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--border)] backdrop-blur-md"
-         style={{ background: "rgba(7,9,15,0.92)" }}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-md border border-[var(--accent-border)] flex items-center justify-center"
-               style={{ background: "var(--accent-dim)" }}>
-            <span className="text-[var(--accent)] font-bold text-xs font-mono">P</span>
-          </div>
-          <span className="font-semibold text-[var(--text-primary)] text-sm tracking-wide">PCD</span>
-          <span className="text-[var(--text-muted)] text-xs hidden sm:inline">· S.Y.A.L.I.S Labs</span>
-        </div>
-        <div className="flex items-center gap-6 text-sm">
-          {["science","architecture","database","about"].map(s => (
-            <a key={s} href={`#${s}`}
-               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors capitalize text-xs tracking-wide hidden md:block">
-              {s}
-            </a>
-          ))}
-          <Link href="/abstract"
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs tracking-wide">
-            Abstract
-          </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b"
+         style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center h-10 gap-6 text-xs">
+        <span className="font-mono font-bold tracking-widest text-[11px]"
+              style={{ color: "var(--accent)" }}>PCD</span>
+        <span style={{ color: "var(--border)" }}>|</span>
+        <span className="font-medium" style={{ color: "var(--text-secondary)" }}>
+          Pharmacological Chaperone Database
+        </span>
+        <div className="ml-auto flex items-center gap-5 text-[11px]">
+          <a href="#methodology" className="nav-link">Methodology</a>
+          <a href="#database" className="nav-link">Browse</a>
+          <a href="#about" className="nav-link">About</a>
+          <Link href="/abstract" className="nav-link">Abstract</Link>
           <Link href="/database"
-            className="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors"
-            style={{ borderColor: "var(--accent-border)", color: "var(--accent)", background: "var(--accent-dim)" }}>
-            Explore →
+            className="px-2.5 py-1 font-semibold border"
+            style={{ borderColor: "var(--border-mid)", color: "var(--text-secondary)", borderRadius: "2px" }}>
+            Full Database
           </Link>
         </div>
       </div>
@@ -43,110 +35,148 @@ function NavBar() {
   );
 }
 
-// ── Hero ─────────────────────────────────────────────────────────────────────
-function HeroSection({ data }: { data: PCDAtlas }) {
+// ── Database identity header ─────────────────────────────────────────────────
+function IdentityHeader({ data }: { data: PCDAtlas }) {
   const avgDrug = data.entries.reduce((s, e) => s + (e.pocket?.fpocket_druggability ?? 0), 0) / data.entries.length;
   const diseases = new Set(data.entries.map(e => e.metadata.disease)).size;
   const total = data.proteome_targets?.total_clinvar_pathogenic_missense ?? 178597;
 
   return (
-    <section className="relative min-h-screen flex flex-col justify-center pt-14 overflow-hidden">
-      <div className="absolute inset-0 grid-bg pointer-events-none" />
-      <div className="relative z-10 max-w-7xl mx-auto px-6 w-full py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8">
 
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center gap-2 mb-5">
-                <span className="tag tag-green">World First</span>
-                <span className="tag tag-cyan">v1.0 — Live</span>
-              </div>
-              <h1 className="text-5xl font-black tracking-tight leading-[1.1]" style={{ color: "var(--text-primary)" }}>
-                Pharmacological<br />
-                <span style={{ color: "var(--accent)" }}>Chaperone</span><br />
-                Database
-              </h1>
-              <p className="mt-5 text-base leading-7" style={{ color: "var(--text-secondary)" }}>
-                The world's first proteome-scale computational database of de novo
-                pharmacological chaperones for pathogenic protein misfolding variants.
-                Built by <span style={{ color: "var(--text-primary)" }}>Aaryan Senthilvanan</span> using REFOLD.
-              </p>
+        {/* Top row — identity + quick-access buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 border"
+                    style={{ color: "var(--accent)", borderColor: "var(--accent-border)", background: "var(--accent-dim)" }}>
+                PCD
+              </span>
+              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                v{data.version} · S.Y.A.L.I.S Labs · ClinVar-derived · AlphaFold2
+              </span>
             </div>
+            <h1 className="text-xl font-bold leading-snug" style={{ color: "var(--text-primary)" }}>
+              Pharmacological Chaperone Database
+            </h1>
+            <p className="text-xs mt-1.5 max-w-xl leading-5" style={{ color: "var(--text-secondary)" }}>
+              Proteome-scale computational database of de novo pharmacological chaperones
+              for pathogenic protein misfolding variants, generated by the REFOLD pipeline.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-3">
+              <Link href="/database"
+                className="px-3 py-1.5 text-xs font-semibold border transition-colors"
+                style={{ background: "var(--accent)", borderColor: "var(--accent)", color: "#fff", borderRadius: "2px" }}>
+                Browse Entries
+              </Link>
+              <a href="#methodology"
+                className="px-3 py-1.5 text-xs font-semibold border transition-colors"
+                style={{ borderColor: "var(--border-mid)", color: "var(--text-secondary)", borderRadius: "2px" }}>
+                Methodology
+              </a>
+              <Link href="/abstract"
+                className="px-3 py-1.5 text-xs font-semibold border transition-colors"
+                style={{ borderColor: "var(--border-mid)", color: "var(--text-secondary)", borderRadius: "2px" }}>
+                Conference Abstract
+              </Link>
+            </div>
+          </div>
 
+          {/* Live statistics panel */}
+          <div className="shrink-0 w-full sm:w-auto">
             <LiveStats
               initialEntries={data.total_entries}
               initialAvgDrug={avgDrug}
               initialDiseases={diseases}
               initialTotal={total}
             />
-
-            <div className="flex gap-3">
-              <Link href="/database"
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                style={{ background: "var(--accent-dim)", borderColor: "var(--accent-border)", color: "var(--accent)" }}>
-                Browse Database →
-              </Link>
-              <a href="#science"
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}>
-                How It Works
-              </a>
-            </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-6 items-center">
-            <div className="relative w-full max-w-md">
-              <div className="rounded-xl overflow-hidden border border-[var(--border)]" style={{ background: "#000" }}>
-                <Image
-                  src="/images/cftr_molecule.png"
-                  alt="3D molecular rendering of a pharmacological chaperone"
-                  width={600}
-                  height={450}
-                  className="w-full h-auto"
-                  priority
-                />
-              </div>
-              <div className="absolute -bottom-2 -right-2 tag tag-cyan text-[9px]">
-                REFOLD-PC-CFTR-001
-              </div>
-            </div>
-          </div>
+        {/* Build date + citation line */}
+        <div className="border-t pt-3 flex flex-wrap gap-6 text-[11px] font-mono"
+             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+          <span>Build date: <span style={{ color: "var(--text-secondary)" }}>{data.build_date}</span></span>
+          <span>Total entries: <span style={{ color: "var(--text-secondary)" }}>{data.total_entries.toLocaleString()}</span></span>
+          <span>Diseases covered: <span style={{ color: "var(--text-secondary)" }}>{diseases}</span></span>
+          <span>Avg. druggability: <span style={{ color: "var(--text-secondary)" }}>{avgDrug.toFixed(3)}</span></span>
         </div>
       </div>
     </section>
   );
 }
 
-// ── Science section ────────────────────────────────────────────────────────
-function ScienceSection() {
+// ── Scientific background ────────────────────────────────────────────────────
+function BackgroundSection() {
   return (
-    <section id="science" className="py-20 border-t border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-6 space-y-16">
+    <section className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-[1fr_440px] gap-10 items-start">
 
-        <div className="max-w-2xl">
-          <div className="section-label mb-3">The Problem</div>
-          <h2 className="text-3xl font-black" style={{ color: "var(--text-primary)" }}>
-            Protein Misfolding & The Chaperone Gap
+        <div className="space-y-4">
+          <div className="section-label">Scientific Background</div>
+          <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
+            Protein Misfolding &amp; the Pharmacological Chaperone Gap
           </h2>
-          <p className="mt-4 leading-7" style={{ color: "var(--text-secondary)" }}>
-            40–60% of pathogenic missense variants cause disease not by disrupting a protein's
-            active site, but by causing it to misfold — the endoplasmic reticulum quality
-            control machinery flags it as defective and routes it to proteasomal degradation
-            before it can reach its functional destination.
-          </p>
-          <p className="mt-3 leading-7" style={{ color: "var(--text-secondary)" }}>
-            The key insight: <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-            these proteins work. They just never arrive.
-            </span> A small molecule that binds the misfolded intermediate and shifts the folding
-            equilibrium back toward the native state is a pharmacological chaperone — and no
-            computational framework for designing them has ever been built. REFOLD is that framework.
-          </p>
+          <div className="space-y-3 text-xs leading-6" style={{ color: "var(--text-secondary)" }}>
+            <p>
+              40–60% of pathogenic missense variants cause disease not by disrupting a protein&apos;s
+              active site, but by triggering premature proteasomal degradation of the misfolded
+              intermediate before it can reach its functional destination. The endoplasmic reticulum
+              quality-control machinery flags structurally aberrant conformers and routes them for
+              degradation via the ubiquitin-proteasome system.
+            </p>
+            <p>
+              The key mechanistic insight:{" "}
+              <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                these proteins retain native-like function; they simply never arrive.
+              </span>{" "}
+              A small molecule that binds the misfolded intermediate and shifts the folding
+              free-energy landscape toward the native basin constitutes a pharmacological chaperone.
+              No systematic computational framework for their design has previously been described.
+              REFOLD provides this framework.
+            </p>
+            <p>
+              Three FDA-approved pharmacological chaperones currently exist, each discovered by
+              brute-force high-throughput screening against a single target at cost exceeding
+              $1B per molecule. REFOLD designs them from structural first principles, for every
+              protein in the human proteome, fully automatically.
+            </p>
+          </div>
         </div>
 
-        {/* Chaperone Gap + Pipeline diagram (Image #2) */}
-        <div className="space-y-3">
-          <div className="section-label">REFOLD Architecture — Systemic Overview</div>
-          <div className="rounded-xl overflow-hidden border border-[var(--border)]">
+        <div className="space-y-2">
+          <div className="section-label">Fig. 1 — Folding energy landscape</div>
+          <div className="overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+            <Image
+              src="/images/cftr_molecule.png"
+              alt="3D molecular rendering of a pharmacological chaperone bound in a transient pocket"
+              width={600}
+              height={450}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
+          <p className="text-[10px] leading-4" style={{ color: "var(--text-muted)" }}>
+            Representative transient pocket (cyan surface) identified in the misfolded intermediate
+            of CFTR-F508del. De novo chaperone shown as amber sticks. Generated by REFOLD Stage 2–3.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Pipeline architecture overview ─────────────────────────────────────────
+function PipelineSection() {
+  return (
+    <section className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+        {/* Architecture overview figure */}
+        <div>
+          <div className="section-label mb-2">Fig. 2 — REFOLD pipeline overview</div>
+          <div className="overflow-hidden border" style={{ borderColor: "var(--border)" }}>
             <Image
               src="/images/arch_chaperone_gap.png"
               alt="The Pharmacological Chaperone Gap and REFOLD Pipeline systemic overview"
@@ -155,80 +185,101 @@ function ScienceSection() {
               className="w-full h-auto"
             />
           </div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Top: Native vs. mutant folding energy landscape. Bottom: REFOLD Stage 1→2→3 pipeline
-            producing the proteome-wide chaperone map.
+          <p className="text-[10px] mt-1 leading-4" style={{ color: "var(--text-muted)" }}>
+            Top: Native vs. mutant folding free-energy landscape. Bottom: REFOLD Stage 1→2→3 pipeline producing the proteome-wide chaperone map.
           </p>
         </div>
 
-        {/* Three-stage pipeline cards */}
-        <div className="grid md:grid-cols-3 gap-4">
-          {[
-            {
-              stage: "Stage 1", name: "Rescue Amenability Classification",
-              label: "GNN-LM Fusion Classifier", color: "var(--accent)",
-              points: [
-                "AlphaFold2 structure + ESM-2 embeddings (1280-d)",
-                "FoldX ΔΔG + evolutionary conservation PSSM",
-                "Atom-edge GNN message passing over protein graph",
-                "AUC 0.88 (Gaucher), 0.79 (Cystic Fibrosis)",
-              ],
-            },
-            {
-              stage: "Stage 2", name: "Conformational Sampling & Pocket ID",
-              label: "ANM + fpocket", color: "var(--violet)",
-              points: [
-                "Anisotropic Network Model over AlphaFold structure",
-                "25–50 conformations sampled along non-trivial modes",
-                "fpocket α-sphere druggability scoring per conformation",
-                "Cryptic pocket isolation: absent in WT, drug > 0.75",
-              ],
-            },
-            {
-              stage: "Stage 3", name: "De Novo Drug Design",
-              label: "SE(3) Equivariant Diffusion", color: "var(--green)",
-              points: [
-                "E_ij pocket geometry matrix as conditioning input",
-                "SE(3)-equivariant E(3)-equivariant denoising network",
-                "T=100 → T=1 diffusion on atom coordinates",
-                "Composite score: 0.45×affinity + 0.30×QED + 0.15×SA + 0.10×logP",
-              ],
-            },
-          ].map(s => (
-            <div key={s.stage} className="card p-5 space-y-4">
-              <span className="tag text-[10px]"
-                    style={{ background: `${s.color}15`, color: s.color, borderColor: `${s.color}30` }}>
-                {s.stage}
-              </span>
-              <div>
-                <div className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>{s.name}</div>
-                <div className="text-xs mt-0.5 font-mono" style={{ color: s.color }}>{s.label}</div>
-              </div>
-              <ul className="space-y-1.5">
-                {s.points.map((p, i) => (
-                  <li key={i} className="flex gap-2 text-xs leading-5" style={{ color: "var(--text-secondary)" }}>
-                    <span style={{ color: s.color, flexShrink: 0 }}>·</span>{p}
-                  </li>
+        {/* Stage table — academic methods-section style */}
+        <div>
+          <div className="section-label mb-2">Pipeline stages — method summary</div>
+          <div className="border" style={{ borderColor: "var(--border)", borderRadius: "2px", overflow: "hidden" }}>
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr style={{ background: "var(--bg-2)", borderBottom: "1px solid var(--border-mid)" }}>
+                  {["Stage", "Objective", "Method", "Key Output", "Performance"].map(h => (
+                    <th key={h} className="px-4 py-2 text-left font-semibold uppercase tracking-wider"
+                        style={{ color: "var(--text-muted)", fontSize: 10 }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    stage: "Stage 1", obj: "Rescue amenability filter",
+                    method: "GNN-LM Fusion Classifier",
+                    output: "Rescue score ∈ [0,1]; threshold ≥ 0.70",
+                    perf: "AUC 0.88 (Gaucher), 0.79 (CF)",
+                    color: "var(--accent)",
+                  },
+                  {
+                    stage: "Stage 2", obj: "Transient pocket identification",
+                    method: "ANM conformational sampling + fpocket α-sphere scoring",
+                    output: "Cryptic pocket geometry, E_ij matrix, best conformation PDB",
+                    perf: "Druggability ≥ 0.75; absent in WT",
+                    color: "var(--violet)",
+                  },
+                  {
+                    stage: "Stage 3", obj: "De novo chaperone design",
+                    method: "SE(3)-equivariant diffusion on pocket E_ij conditioning",
+                    output: "SMILES, physicochemical properties, composite score",
+                    perf: "Score = 0.45·affinity + 0.30·QED + 0.15·SA + 0.10·logP",
+                    color: "var(--green)",
+                  },
+                ].map((s, i) => (
+                  <tr key={s.stage}
+                      style={{ background: i % 2 === 0 ? "var(--bg)" : "var(--bg-1)", borderBottom: "1px solid var(--border)" }}>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="font-mono font-bold text-[10px]" style={{ color: s.color }}>{s.stage}</span>
+                    </td>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--text-primary)", fontWeight: 500 }}>{s.obj}</td>
+                    <td className="px-4 py-3 text-xs" style={{ color: "var(--text-secondary)" }}>{s.method}</td>
+                    <td className="px-4 py-3 text-xs font-mono" style={{ color: "var(--text-secondary)" }}>{s.output}</td>
+                    <td className="px-4 py-3 text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>{s.perf}</td>
+                  </tr>
                 ))}
-              </ul>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── ML architecture diagram ─────────────────────────────────────────────────
+function ArchitectureSection() {
+  return (
+    <section id="methodology" className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-4">
+
+        <div className="grid lg:grid-cols-[200px_1fr] gap-6 items-start">
+          <div>
+            <div className="section-label mb-2">Fig. 3</div>
+            <div className="font-semibold text-sm leading-5" style={{ color: "var(--text-primary)" }}>
+              ML Architecture — Technical Detail
             </div>
-          ))}
+            <p className="text-xs mt-2 leading-5" style={{ color: "var(--text-secondary)" }}>
+              Part A: GNN feature extractor with atom-edge message passing +
+              Transformer LM fusion → rescuability logits.
+            </p>
+            <p className="text-xs mt-1 leading-5" style={{ color: "var(--text-secondary)" }}>
+              Part B: SE(3)-equivariant denoising network for structure-conditioned
+              molecular generation (T=100→T=1 diffusion trajectory).
+            </p>
+          </div>
+          <div className="space-y-1">
+            <GnnDiagram />
+            <p className="text-[10px] leading-4" style={{ color: "var(--text-muted)" }}>
+              Inputs: AlphaFold2 structure, ESM-2 embeddings (1280-d), FoldX ΔΔG, PSSM conservation scores.
+              Conditioning: E_ij Cα–Cα distance matrix from Stage 2 pocket geometry.
+            </p>
+          </div>
         </div>
 
-        {/* GNN-LM + SE(3) diagram (Image #1 / #3) */}
-        <div id="architecture" className="space-y-3">
-          <div className="section-label">ML Architecture — Technical Detail</div>
-          <GnnDiagram />
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Part A: GNN feature extractor with atom-edge message passing + Transformer LM fusion → rescuability logits.
-            Part B: SE(3)-equivariant denoising network for structure-conditioned molecular generation (T=T→T=1).
-          </p>
-        </div>
-
-        {/* Pipeline overview diagram */}
-        <div className="space-y-3">
-          <div className="section-label">Pipeline — End-to-End Flow</div>
-          <div className="rounded-xl overflow-hidden border border-[var(--border)]">
+        <div className="space-y-1">
+          <div className="section-label">Fig. 4 — End-to-end pipeline flow</div>
+          <div className="overflow-hidden border" style={{ borderColor: "var(--border)" }}>
             <Image
               src="/images/arch_pipeline_overview.png"
               alt="REFOLD pipeline end-to-end overview"
@@ -238,7 +289,6 @@ function ScienceSection() {
             />
           </div>
         </div>
-
       </div>
     </section>
   );
@@ -246,63 +296,98 @@ function ScienceSection() {
 
 // ── Database preview ────────────────────────────────────────────────────────
 function DatabasePreview({ data }: { data: PCDAtlas }) {
-  const preview = data.entries.slice(0, 3);
+  const preview = data.entries.slice(0, 5);
   return (
-    <section id="database" className="py-20 border-t border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-6 space-y-8">
+    <section id="database" className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-4">
         <div className="flex items-end justify-between">
           <div>
-            <div className="section-label mb-2">Live Atlas</div>
-            <h2 className="text-3xl font-black" style={{ color: "var(--text-primary)" }}>Chaperone Database</h2>
-            <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-              {data.total_entries} entries · continuously growing · powered by REFOLD
+            <div className="section-label mb-1">Database Preview</div>
+            <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>Chaperone Entries</h2>
+            <p className="mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
+              {data.total_entries.toLocaleString()} entries · sorted by fpocket druggability score (desc.)
             </p>
           </div>
           <Link href="/database"
-            className="px-4 py-2 rounded-lg text-sm font-semibold border transition-colors"
-            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}>
-            View all →
+            className="px-3 py-1.5 text-xs font-semibold border"
+            style={{ borderColor: "var(--border-mid)", color: "var(--text-secondary)", borderRadius: "2px" }}>
+            Browse all {data.total_entries} entries →
           </Link>
         </div>
 
-        <div className="space-y-2">
-          {preview.map(entry => (
-            <Link key={entry.entry_id} href={`/database/${entry.entry_id}`} className="block">
-              <div className="card-hover rounded-lg p-4 grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-3 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="tag tag-cyan">{entry.metadata.gene}</span>
-                    <span className="tag tag-amber">{entry.metadata.mutation_mature}</span>
-                  </div>
-                  <div className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{entry.entry_id}</div>
-                </div>
-                <div className="col-span-4">
-                  <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{entry.metadata.disease}</div>
-                  <div className="text-xs mt-0.5 line-clamp-1" style={{ color: "var(--text-muted)" }}>{entry.metadata.mechanism}</div>
-                </div>
-                <div className="col-span-3 space-y-1.5">
-                  <div className="flex justify-between text-[10px] mb-0.5">
-                    <span style={{ color: "var(--text-muted)" }}>Drug Score</span>
-                    <span className="font-mono" style={{ color: "var(--accent)" }}>{entry.pocket.fpocket_druggability.toFixed(3)}</span>
-                  </div>
-                  <div className="score-bar-track">
-                    <div className="score-bar-fill" style={{ width: `${entry.pocket.fpocket_druggability * 100}%` }} />
-                  </div>
-                </div>
-                <div className="col-span-2 flex justify-end">
-                  <span className="text-xs" style={{ color: "var(--accent)" }}>→</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <Link href="/database"
-            className="inline-block px-6 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-            style={{ borderColor: "var(--accent-border)", color: "var(--accent)", background: "var(--accent-dim)" }}>
-            Browse Full Database
-          </Link>
+        <div className="border" style={{ borderColor: "var(--border)", overflow: "hidden" }}>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr style={{ background: "var(--bg-2)", borderBottom: "2px solid var(--border-mid)" }}>
+                {[
+                  { h: "Entry ID", note: "gene · variant" },
+                  { h: "Disease", note: "" },
+                  { h: "Drug Score", note: "fpocket" },
+                  { h: "Chaperone Score", note: "composite" },
+                  { h: "MW", note: "Da" },
+                  { h: "QED", note: "" },
+                ].map(c => (
+                  <th key={c.h} className="px-4 py-2 text-left font-semibold"
+                      style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                    <span className="uppercase tracking-wider">{c.h}</span>
+                    {c.note && <span className="font-normal ml-1 normal-case tracking-normal" style={{ color: "var(--border-mid)" }}>({c.note})</span>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {preview.map((entry, i) => (
+                <tr key={entry.entry_id}
+                    style={{
+                      background: i % 2 === 0 ? "var(--bg)" : "var(--bg-1)",
+                      borderBottom: "1px solid var(--border)",
+                    }}>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block">
+                      <div className="flex items-center gap-1.5">
+                        <span className="tag tag-cyan">{entry.metadata.gene}</span>
+                        <span className="tag tag-amber">{entry.metadata.mutation_mature}</span>
+                      </div>
+                      <div className="font-mono text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{entry.entry_id}</div>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block text-xs" style={{ color: "var(--text-secondary)" }}>
+                      {entry.metadata.disease}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block">
+                      <span className="font-mono font-bold text-xs" style={{ color: "var(--accent)" }}>
+                        {(entry.pocket.fpocket_druggability ?? 0).toFixed(3)}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block">
+                      <span className="font-mono font-bold text-xs" style={{ color: "var(--violet)" }}>
+                        {(entry.chaperone?.composite_score ?? 0).toFixed(3)}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block">
+                      <span className="font-mono text-xs" style={{ color: "var(--text-secondary)" }}>
+                        {(entry.chaperone?.mw ?? 0).toFixed(0)}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/database/${entry.entry_id}`} className="block">
+                      <span className="font-mono text-xs" style={{ color: "var(--text-secondary)" }}>
+                        {(entry.chaperone?.qed ?? 0).toFixed(3)}
+                      </span>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -312,12 +397,12 @@ function DatabasePreview({ data }: { data: PCDAtlas }) {
 // ── About ────────────────────────────────────────────────────────────────────
 function AboutSection() {
   return (
-    <section id="about" className="py-20 border-t border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-3 gap-12 items-start">
+    <section id="about" className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid lg:grid-cols-[160px_1fr] gap-10 items-start">
 
-          <div className="space-y-5">
-            <div className="rounded-xl overflow-hidden border border-[var(--border)] w-48">
+          <div className="space-y-3">
+            <div className="overflow-hidden border w-32" style={{ borderColor: "var(--border)" }}>
               <Image
                 src="/images/aaryan.jpg"
                 alt="Aaryan Senthilvanan"
@@ -327,55 +412,55 @@ function AboutSection() {
               />
             </div>
             <div>
-              <div className="font-bold text-base" style={{ color: "var(--text-primary)" }}>Aaryan Senthilvanan</div>
-              <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>Investigator</div>
-              <div className="text-sm mt-0.5 font-mono" style={{ color: "var(--accent)" }}>S.Y.A.L.I.S Labs</div>
+              <div className="font-semibold text-xs" style={{ color: "var(--text-primary)" }}>Aaryan Senthilvanan</div>
+              <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>Principal Investigator</div>
+              <div className="text-[11px] mt-0.5 font-mono" style={{ color: "var(--accent)" }}>S.Y.A.L.I.S Labs</div>
             </div>
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-5">
             <div>
-              <div className="section-label mb-3">About</div>
-              <h2 className="text-3xl font-black" style={{ color: "var(--text-primary)" }}>
-                Building the cure for every misfolding disease
+              <div className="section-label mb-1.5">About</div>
+              <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
+                REFOLD — Proteome-Scale Pharmacological Chaperone Design
               </h2>
             </div>
 
-            <div className="space-y-4 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>
+            <div className="space-y-3 text-xs leading-6" style={{ color: "var(--text-secondary)" }}>
               <p>
-                REFOLD is a fully automated, end-to-end computational pipeline that takes any
-                human disease-associated missense mutation as input and outputs: (1) a binary
-                prediction of whether the mutation causes misfolding rather than functional
-                disruption; (2) the 3D structure of the mutant protein in its partially unfolded
-                state with transient binding pockets identified; (3) de novo designed small molecule
-                candidates that bind those pockets and thermodynamically stabilize the correct fold.
+                REFOLD is a fully automated, end-to-end computational pipeline that accepts any
+                human disease-associated missense mutation as input and produces: (1) a binary
+                prediction of whether the variant drives pathogenesis via protein misfolding
+                rather than active-site disruption; (2) the 3D transient-conformation structure
+                of the mutant protein with cryptic binding pockets resolved; (3) de novo designed
+                small-molecule candidates that bind those pockets and thermodynamically stabilize
+                the native fold.
               </p>
               <p>
-                The PCD is the output of running REFOLD continuously across the entire human
-                proteome — every pathogenic missense variant in ClinVar, processed one by one,
-                with each result injected into this living database automatically.
+                The PCD is the product of continuously running REFOLD across the complete human
+                proteome — processing every pathogenic missense variant in ClinVar sequentially,
+                with each result automatically injected into this living database.
               </p>
-              <blockquote className="border-l-2 pl-4 py-1" style={{ borderColor: "var(--accent)" }}>
-                <p className="italic" style={{ color: "var(--text-primary)" }}>
-                  "Three FDA-approved pharmacological chaperones exist. Each is a multi-billion
-                  dollar drug discovered by brute-force screening of hundreds of thousands of
-                  compounds against a single protein. REFOLD designs them from first principles,
-                  for every protein, automatically."
-                </p>
-              </blockquote>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { v: "20,430", l: "Canonical human proteins" },
-                { v: "178,597", l: "ClinVar pathogenic missense variants" },
-                { v: "5,992", l: "Genes with known pathogenic variants" },
-              ].map(s => (
-                <div key={s.l} className="card p-4">
-                  <div className="text-xl font-black font-mono" style={{ color: "var(--accent)" }}>{s.v}</div>
-                  <div className="data-label mt-1">{s.l}</div>
-                </div>
-              ))}
+            <div className="border" style={{ borderColor: "var(--border)", borderRadius: "2px", overflow: "hidden" }}>
+              <table className="w-full text-xs border-collapse">
+                <tbody>
+                  {[
+                    ["Human protein-coding genes", "20,430"],
+                    ["ClinVar pathogenic missense variants", "178,597"],
+                    ["Genes with known pathogenic variants", "5,992"],
+                    ["Pipeline runtime per variant (avg.)", "~4–8 min"],
+                    ["Database update frequency", "Continuous (daemon)"],
+                  ].map(([label, val], i) => (
+                    <tr key={label}
+                        style={{ background: i % 2 === 0 ? "var(--bg)" : "var(--bg-1)", borderBottom: "1px solid var(--border)" }}>
+                      <td className="px-4 py-2" style={{ color: "var(--text-secondary)" }}>{label}</td>
+                      <td className="px-4 py-2 font-mono font-semibold text-right" style={{ color: "var(--accent)" }}>{val}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -387,37 +472,36 @@ function AboutSection() {
 // ── Footer ───────────────────────────────────────────────────────────────────
 function Footer({ data }: { data: PCDAtlas }) {
   return (
-    <footer className="border-t border-[var(--border)] py-8">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded border border-[var(--accent-border)] flex items-center justify-center"
-               style={{ background: "var(--accent-dim)" }}>
-            <span className="text-[var(--accent)] font-bold text-[10px] font-mono">P</span>
-          </div>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            PCD v{data.version} · S.Y.A.L.I.S Labs · Powered by REFOLD
-          </span>
+    <footer className="border-t py-4" style={{ borderColor: "var(--border)", background: "var(--bg-1)" }}>
+      <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+          <span style={{ color: "var(--accent)", fontWeight: 700 }}>PCD</span>
+          {" "}v{data.version} · S.Y.A.L.I.S Labs · Powered by REFOLD
         </div>
-        <div className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-          {data.total_entries} entries · {data.build_date}
+        <div className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+          {data.total_entries.toLocaleString()} entries · build {data.build_date} · continuous update
         </div>
       </div>
     </footer>
   );
 }
 
-// ── Page (server component, fetches live data) ───────────────────────────────
+// ── Page ───────────────────────────────────────────────────────────────────
 export default async function HomePage() {
   const data = await fetchAtlas();
 
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
       <NavBar />
-      <HeroSection data={data} />
-      <ScienceSection />
-      <DatabasePreview data={data} />
-      <AboutSection />
-      <Footer data={data} />
+      <div style={{ paddingTop: "40px" }}>
+        <IdentityHeader data={data} />
+        <BackgroundSection />
+        <PipelineSection />
+        <ArchitectureSection />
+        <DatabasePreview data={data} />
+        <AboutSection />
+        <Footer data={data} />
+      </div>
     </div>
   );
 }

@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 
 interface MolViewerProps {
   pdbUrl: string;
-  pocketResidues: string[];   // e.g. ["A40", "R41", "P42"]
+  pocketResidues: string[];
+  ligandSdfUrl?: string;
   height?: number;
 }
 
@@ -14,21 +15,19 @@ declare global {
   }
 }
 
-export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerProps) {
+export function MolViewer({ pdbUrl, pocketResidues, ligandSdfUrl, height = 300 }: MolViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<unknown>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [hasLigand, setHasLigand] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Block ALL zoom inputs — wheel, trackpad pinch, middle-button drag.
-    // Rotation (left-drag) still works normally.
     const blockZoom = (e: WheelEvent) => e.preventDefault();
     const blockMiddle = (e: MouseEvent) => { if (e.button === 1) e.preventDefault(); };
 
     async function init() {
-      // Load 3Dmol.js from CDN if not already present
       if (!window.$3Dmol) {
         await new Promise<void>((resolve, reject) => {
           const s = document.createElement("script");
@@ -42,7 +41,7 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
       if (cancelled || !containerRef.current) return;
 
       const viewer = window.$3Dmol.createViewer(containerRef.current, {
-        backgroundColor: "#07090f",
+        backgroundColor: "#0d1424",
         antialias: true,
         disableScroll: true,
       });
@@ -60,19 +59,13 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
 
         viewer.addModel(pdbText, "pdb");
 
-        // Main protein — clean cartoon
+        // Protein backbone — muted navy-teal ribbon
         viewer.setStyle({}, {
-          cartoon: {
-            color: "#1a3a5c",
-            opacity: 0.85,
-            thickness: 0.3,
-          }
+          cartoon: { color: "#1e3a5c", opacity: 0.80, thickness: 0.28 }
         });
 
-        // Pocket-lining residues — highlighted in accent cyan
+        // Pocket-lining residues — accent teal
         if (pocketResidues.length > 0) {
-          // 3Dmol.js resi selector requires an integer array (atom.resi is stored as int).
-          // Comma-string "287,288" does NOT work — 3Dmol only parses strings as ranges ("287-294").
           const resnums: number[] = pocketResidues
             .map(r => parseInt(r.replace(/[^0-9]/g, ""), 10))
             .filter(n => !isNaN(n) && n > 0);
@@ -80,21 +73,42 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
             viewer.setStyle(
               { resi: resnums },
               {
-                cartoon: { color: "#0ea5e9", opacity: 1.0, thickness: 0.5 },
-                stick: { colorscheme: "cyanCarbon", radius: 0.25, opacity: 1.0 },
+                cartoon: { color: "#0ea5e9", opacity: 1.0, thickness: 0.4 },
+                stick:   { colorscheme: "cyanCarbon", radius: 0.22, opacity: 1.0 },
               }
             );
-            // Transparent surface over pocket residues
             viewer.addSurface(
               window.$3Dmol.SurfaceType.SAS,
-              { opacity: 0.30, color: "#0ea5e9" },
+              { opacity: 0.22, color: "#38bdf8" },
               { resi: resnums }
             );
           }
         }
 
+        // Chaperone ligand — amber sticks
+        if (ligandSdfUrl) {
+          try {
+            const sdfRes = await fetch(ligandSdfUrl);
+            if (sdfRes.ok) {
+              const sdfText = await sdfRes.text();
+              if (!cancelled && sdfText.trim()) {
+                viewer.addModel(sdfText, "sdf");
+                const models = viewer.getModelList();
+                const ligandModel = models[models.length - 1];
+                ligandModel.setStyle({}, {
+                  stick:  { colorscheme: "orangeCarbon", radius: 0.18, opacity: 1.0 },
+                  sphere: { colorscheme: "orangeCarbon", radius: 0.26, opacity: 0.85 },
+                });
+                if (!cancelled) setHasLigand(true);
+              }
+            }
+          } catch {
+            // Ligand optional — protein view still valid
+          }
+        }
+
         viewer.zoomTo();
-        viewer.zoom(0.85);
+        viewer.zoom(0.82);
         viewer.render();
         if (!cancelled) setStatus("ready");
       } catch (err) {
@@ -112,51 +126,63 @@ export function MolViewer({ pdbUrl, pocketResidues, height = 420 }: MolViewerPro
         el.removeEventListener("mousedown", blockMiddle);
       }
     };
-  }, [pdbUrl, pocketResidues]);
+  }, [pdbUrl, pocketResidues, ligandSdfUrl]);
 
   return (
-    <div className="relative rounded-xl overflow-hidden border border-[var(--border)] mol-viewer"
-         style={{ height }}>
+    <div className="relative mol-viewer" style={{ height }}>
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
 
-      {/* Overlay states */}
+      {/* Loading */}
       {status === "loading" && (
-        <div className="absolute inset-0 flex items-center justify-center"
-             style={{ background: "#07090f" }}>
-          <div className="text-center space-y-3">
+        <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#0d1424" }}>
+          <div className="text-center space-y-2">
             <div className="flex justify-center gap-1">
               {[0,1,2].map(i => (
-                <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
-                     style={{ animation: `pulse-dot 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                <div key={i} className="w-1 h-1 rounded-full pulse-dot"
+                     style={{ background: "#0ea5e9", animationDelay: `${i * 0.2}s` }} />
               ))}
             </div>
-            <div className="section-label">Loading structure...</div>
-          </div>
-        </div>
-      )}
-      {status === "error" && (
-        <div className="absolute inset-0 flex items-center justify-center"
-             style={{ background: "#07090f" }}>
-          <div className="text-center space-y-2">
-            <div className="section-label">Structure unavailable</div>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>PDB file not found at {pdbUrl}</p>
+            <div className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "#475569" }}>
+              Loading structure
+            </div>
           </div>
         </div>
       )}
 
-      {/* Legend overlay */}
+      {/* Error */}
+      {status === "error" && (
+        <div className="absolute inset-0 flex items-center justify-center" style={{ background: "#0d1424" }}>
+          <div className="text-center space-y-1">
+            <div className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "#475569" }}>
+              Structure unavailable
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Legend — dark semi-transparent to stay readable on dark canvas */}
       {status === "ready" && (
-        <div className="absolute bottom-3 left-3 flex items-center gap-4 px-3 py-1.5 rounded-md border border-[var(--border)]"
-             style={{ background: "rgba(7,9,15,0.85)", backdropFilter: "blur(4px)" }}>
+        <div className="absolute bottom-2 left-2 flex items-center gap-3 px-2.5 py-1 border"
+             style={{
+               background: "rgba(13,20,36,0.88)",
+               borderColor: "rgba(255,255,255,0.08)",
+               borderRadius: "2px",
+             }}>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-1 rounded-sm" style={{ background: "#1a3a5c" }} />
-            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Protein</span>
+            <div className="w-2.5 h-1" style={{ background: "#1e3a5c", borderRadius: "1px" }} />
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>Protein</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-1 rounded-sm bg-[var(--accent)]" />
-            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Pocket</span>
+            <div className="w-2.5 h-1" style={{ background: "#0ea5e9", borderRadius: "1px" }} />
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>Pocket</span>
           </div>
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>drag to rotate</span>
+          {hasLigand && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-1" style={{ background: "#f97316", borderRadius: "1px" }} />
+              <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#64748b" }}>Chaperone</span>
+            </div>
+          )}
+          <span className="text-[9px]" style={{ color: "#334155" }}>drag · rotate</span>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Comprehensive atlas backfill — fixes all missing fields in PCD_global_atlas.json."""
 
-import json, os, math, re
+import json, os, math, re, shutil
 from pathlib import Path
 
 ATLAS_PATHS = [
@@ -10,6 +10,7 @@ ATLAS_PATHS = [
     Path("pcd-website/public/PCD_global_atlas.json"),
 ]
 RESULTS_DIR = Path("data/results")
+PUBLIC_STRUCTURES = Path("pcd-website/public/structures")
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/aesenthilvanan-coder/pcd-atlas-data/main"
 
 AA_3TO1 = {
@@ -127,6 +128,42 @@ def _compute_tpsa_rdkit(smiles: str) -> float:
     return None
 
 
+def _generate_ligand_sdf(smiles: str, pocket_center: list, out_path: Path) -> bool:
+    """Generate a 3D SDF for the chaperone, translated to pocket_center. Returns True on success."""
+    try:
+        import numpy as np
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return False
+        mol = Chem.AddHs(mol)
+        params = AllChem.ETKDGv3()
+        params.randomSeed = 42
+        if AllChem.EmbedMolecule(mol, params) == -1:
+            # Fallback to basic ETDG
+            if AllChem.EmbedMolecule(mol, AllChem.ETDG()) == -1:
+                return False
+        AllChem.MMFFOptimizeMolecule(mol, maxIters=200)
+        mol = Chem.RemoveHs(mol)
+        conf = mol.GetConformer()
+        positions = np.array([list(conf.GetAtomPosition(i)) for i in range(mol.GetNumAtoms())])
+        current_center = positions.mean(axis=0)
+        target = np.array(pocket_center, dtype=float)
+        delta = target - current_center
+        for i in range(mol.GetNumAtoms()):
+            pos = conf.GetAtomPosition(i)
+            conf.SetAtomPosition(i, (pos.x + delta[0], pos.y + delta[1], pos.z + delta[2]))
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        writer = Chem.SDWriter(str(out_path))
+        writer.write(mol)
+        writer.close()
+        return True
+    except Exception as e:
+        print(f"    [WARN] SDF generation failed: {e}")
+        return False
+
+
 def backfill():
     # Use the first file that exists as source
     src_path = next((p for p in ATLAS_PATHS if p.exists()), ATLAS_PATHS[0])
@@ -223,11 +260,11 @@ def backfill():
         if "exceeds_threshold" not in pkt:
             pkt["exceeds_threshold"] = pkt.get("fpocket_druggability", 0) > 0.70
 
-        if not pkt.get("alpha_sphere_count"):
-            # proxy: n_lining_residues * 3 (rough estimate)
-            pkt["alpha_sphere_count"] = pkt.get("n_lining_residues", len(
+        if not pkt.get("alpha_sphere_count") or pkt.get("alpha_sphere_count") == 1:
+            # alpha_sphere_count=1 means synthetic_pocket fallback was used — proxy with n_lining_residues
+            pkt["alpha_sphere_count"] = max(4, pkt.get("n_lining_residues", len(
                 seq.get("pocket_lining_residues","").split("-")
-            )) * 3
+            )) * 3)
 
         if not pkt.get("dist_mutation_to_pocket_angstrom") and mut_pos and full_seq:
             center = pkt.get("center_angstrom")
@@ -300,6 +337,33 @@ def backfill():
         # ── metadata enrichment ─────────────────────────────────────────
         if not meta.get("uniprot") and ps:
             meta["uniprot"] = ps.get("uniprot", "")
+
+        # ── ligand SDF (for 3D viewer) ──────────────────────────────────
+        assets = entry.setdefault("assets", {})
+        ligand_sdf_local = PUBLIC_STRUCTURES / f"{eid}-ligand.sdf"
+        ligand_sdf_url = f"/structures/{eid}-ligand.sdf"
+        if not assets.get("ligand_sdf_url") or not ligand_sdf_local.exists():
+            smiles = chap.get("smiles", "")
+            pocket_center = pkt.get("center_angstrom", [])
+            if smiles and pocket_center and len(pocket_center) == 3:
+                PUBLIC_STRUCTURES.mkdir(parents=True, exist_ok=True)
+                ok = _generate_ligand_sdf(smiles, pocket_center, ligand_sdf_local)
+                if ok:
+                    assets["ligand_sdf_url"] = ligand_sdf_url
+
+        # ── best-conformation PDB copy ──────────────────────────────────
+        # If the pocket_summary has best_conformation_pdb, ensure that specific
+        # conformation (not just mt_00) is what's in public/structures.
+        if result_dir and ps:
+            best_conf_path = ps.get("best_conformation_pdb", "")
+            if best_conf_path:
+                best_conf = Path(best_conf_path)
+                if not best_conf.is_absolute():
+                    best_conf = result_dir / best_conf_path
+                pub_pdb = PUBLIC_STRUCTURES / f"{eid}.pdb"
+                if best_conf.exists() and (not pub_pdb.exists()):
+                    PUBLIC_STRUCTURES.mkdir(parents=True, exist_ok=True)
+                    shutil.copy(best_conf, pub_pdb)
 
         updated += 1
         if idx % 25 == 0:

@@ -331,7 +331,13 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
                        entry_id: str, work_dir: Path) -> dict:
     """Assemble a complete PCDEntry dict matching the GBA1/CFTR schema."""
     now = datetime.now(timezone.utc).isoformat()
-    pdb_src = next(work_dir.glob("conformations/mt_*.pdb"), None)
+    # Prefer the best-pocket conformation over an arbitrary first match
+    _best_conf_str = pocket_summary.get("best_conformation_pdb", "")
+    if _best_conf_str:
+        _best_conf = Path(_best_conf_str) if Path(_best_conf_str).is_absolute() else work_dir / _best_conf_str
+        pdb_src = _best_conf if _best_conf.exists() else next(work_dir.glob("conformations/mt_*.pdb"), None)
+    else:
+        pdb_src = next(work_dir.glob("conformations/mt_*.pdb"), None)
     pdb_public = f"{ATLAS_RAW_BASE}/structures/{entry_id}.pdb"
     if pdb_src:
         shutil.copy(pdb_src, PUBLIC_PDB / f"{entry_id}.pdb")
@@ -403,6 +409,34 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
         "sequence_slice_around_pocket":   seq_slice,
     }
 
+    # Generate ligand SDF for 3D viewer
+    _ligand_sdf_url = ""
+    _smiles = chaperone.get("smiles", "") if chaperone else ""
+    _center = pocket_section.get("center_angstrom", [])
+    if _smiles and len(_center) == 3:
+        try:
+            import numpy as np
+            from rdkit import Chem
+            from rdkit.Chem import AllChem
+            _mol = Chem.MolFromSmiles(_smiles)
+            if _mol:
+                _mol = Chem.AddHs(_mol)
+                _p = AllChem.ETKDGv3(); _p.randomSeed = 42
+                if AllChem.EmbedMolecule(_mol, _p) != -1:
+                    AllChem.MMFFOptimizeMolecule(_mol, maxIters=200)
+                    _mol = Chem.RemoveHs(_mol)
+                    _conf = _mol.GetConformer()
+                    _pos = np.array([list(_conf.GetAtomPosition(i)) for i in range(_mol.GetNumAtoms())])
+                    _delta = np.array(_center) - _pos.mean(axis=0)
+                    for _i in range(_mol.GetNumAtoms()):
+                        _ap = _conf.GetAtomPosition(_i)
+                        _conf.SetAtomPosition(_i, (_ap.x + _delta[0], _ap.y + _delta[1], _ap.z + _delta[2]))
+                    _sdf_path = PUBLIC_PDB / f"{entry_id}-ligand.sdf"
+                    _w = Chem.SDWriter(str(_sdf_path)); _w.write(_mol); _w.close()
+                    _ligand_sdf_url = f"/structures/{entry_id}-ligand.sdf"
+        except Exception as _e:
+            log.debug(f"Ligand SDF generation skipped: {_e}")
+
     return {
         "entry_id":      entry_id,
         "pdb_structure": pdb_public,
@@ -428,12 +462,13 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
         },
         "chaperone": chaperone,
         "assets": {
-            "eij_matrix_npy":           str(work_dir / "E_ij_matrix.npy"),
-            "eij_matrix_csv":           str(eij_csv) if eij_csv.exists() else None,
+            "eij_matrix_npy":             str(work_dir / "E_ij_matrix.npy"),
+            "eij_matrix_csv":             str(eij_csv) if eij_csv.exists() else None,
             "transient_conformation_pdb": str(pdb_src) if pdb_src else "",
-            "pocket_summary_json":      str(work_dir / "pocket_summary.json"),
-            "stage3_candidates_json":   str(work_dir / "stage3_chaperone_candidates.json"),
-            "pdb_structure":            pdb_public,
+            "pocket_summary_json":        str(work_dir / "pocket_summary.json"),
+            "stage3_candidates_json":     str(work_dir / "stage3_chaperone_candidates.json"),
+            "pdb_structure":              pdb_public,
+            "ligand_sdf_url":             _ligand_sdf_url,
         },
         "status":    "COMPLETE",
         "created_at": now,

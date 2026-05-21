@@ -2,7 +2,7 @@
 
 export function GnnDiagram() {
   return (
-    <div className="rounded-xl overflow-hidden border border-[var(--border)]">
+    <div className="overflow-hidden border" style={{ borderColor: "var(--border)" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/arch_gnn_diffusion.png"
