@@ -213,16 +213,28 @@ ATLAS_RAW_BASE = "https://raw.githubusercontent.com/aesenthilvanan-coder/pcd-atl
 
 
 def push_to_github(atlas: dict, pdb_src: Path | None = None, entry_id: str | None = None):
-    """Commit and push atlas JSON to pcd-atlas-data repo. PDB files stay in pcd-website/public/structures."""
+    """Commit and push atlas JSON + PDB/SDF structures to pcd-atlas-data repo."""
     if not GITHUB_DATA_REPO.exists():
         log.warning("GitHub data repo not found — skipping push")
         return
     try:
+        struct_dir = GITHUB_DATA_REPO / "structures"
+        struct_dir.mkdir(exist_ok=True)
+
         shutil.copy(ATLAS_FILE, GITHUB_DATA_REPO / "PCD_global_atlas.json")
+        files_to_add = ["PCD_global_atlas.json"]
+
+        if entry_id:
+            for ext in (".pdb", "-ligand.sdf"):
+                src = PUBLIC_PDB / f"{entry_id}{ext}"
+                if src.exists():
+                    shutil.copy(src, struct_dir / f"{entry_id}{ext}")
+                    files_to_add.append(f"structures/{entry_id}{ext}")
+
         n = atlas["total_entries"]
         eid = entry_id or (atlas["entries"][-1]["entry_id"] if atlas["entries"] else "?")
         msg = f"Add {eid} — {n} total entries"
-        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add", "PCD_global_atlas.json"],
+        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add"] + files_to_add,
                        check=True, capture_output=True)
         subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "commit", "-m", msg],
                        check=True, capture_output=True)
@@ -424,7 +436,7 @@ def build_atlas_entry(variant: dict, pocket_summary: dict, chaperone: dict,
                         _conf.SetAtomPosition(_i, (_ap.x + _delta[0], _ap.y + _delta[1], _ap.z + _delta[2]))
                     _sdf_path = PUBLIC_PDB / f"{entry_id}-ligand.sdf"
                     _w = Chem.SDWriter(str(_sdf_path)); _w.write(_mol); _w.close()
-                    _ligand_sdf_url = f"/structures/{entry_id}-ligand.sdf"
+                    _ligand_sdf_url = f"{ATLAS_RAW_BASE}/structures/{entry_id}-ligand.sdf"
         except Exception as _e:
             log.debug(f"Ligand SDF generation skipped: {_e}")
 
