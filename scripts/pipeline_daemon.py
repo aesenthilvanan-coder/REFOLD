@@ -213,30 +213,21 @@ ATLAS_RAW_BASE = "https://raw.githubusercontent.com/aesenthilvanan-coder/pcd-atl
 
 
 def push_to_github(atlas: dict, pdb_src: Path | None = None, entry_id: str | None = None):
-    """Commit and push atlas JSON (+ optional PDB) to pcd-atlas-data repo."""
+    """Commit and push atlas JSON to pcd-atlas-data repo. PDB files stay in pcd-website/public/structures."""
     if not GITHUB_DATA_REPO.exists():
         log.warning("GitHub data repo not found — skipping push")
         return
     try:
         shutil.copy(ATLAS_FILE, GITHUB_DATA_REPO / "PCD_global_atlas.json")
-        files_to_add = ["PCD_global_atlas.json"]
-
-        if pdb_src and pdb_src.exists() and entry_id:
-            struct_dir = GITHUB_DATA_REPO / "structures"
-            struct_dir.mkdir(exist_ok=True)
-            dest = struct_dir / f"{entry_id}.pdb"
-            shutil.copy(pdb_src, dest)
-            files_to_add.append(f"structures/{entry_id}.pdb")
-
         n = atlas["total_entries"]
         eid = entry_id or (atlas["entries"][-1]["entry_id"] if atlas["entries"] else "?")
         msg = f"Add {eid} — {n} total entries"
-        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add"] + files_to_add,
+        subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "add", "PCD_global_atlas.json"],
                        check=True, capture_output=True)
         subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "commit", "-m", msg],
                        check=True, capture_output=True)
         subprocess.run(["git", "-C", str(GITHUB_DATA_REPO), "push"],
-                       check=True, capture_output=True, timeout=30)
+                       check=True, capture_output=True, timeout=60)
         log.info(f"✓ Pushed to GitHub: {msg}")
     except Exception as e:
         log.error(f"GitHub push failed: {e}")
